@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const chalk = require('chalk');
+const cookieParser = require('cookie-parser');
 
 require('dotenv').config();
 
@@ -11,6 +12,7 @@ const DB_URL = process.env.MONGODB_URI;
 
 app.use(cors());
 app.use(express.json());
+app.use(cookieParser());
 
 mongoose.connect(DB_URL).then(()=> console.log(chalk.blue('Успешное подключение к MongoDB!')))
     .catch((err)=> console.error(chalk.red('Ошибка подключения к MongoDB', err)));
