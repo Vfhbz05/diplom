@@ -37,10 +37,69 @@ async function login(email, password){
     return { token, user };
 }
 
+async function getAllUsers(){
+    return await User.find().sort({ createdAt: -1})
+}
+
+async function updateUserByAdmin(userId, newData){
+    const { name, password, role } = newData;
+    const updateFields = {};
+
+    if(name){ updateFields.name = name; }
+    if(role){ updateFields.role = role; }
+
+    if(password){
+        if(password.length < 6){
+            throw new Error('Пароль должен быть не менее 6 символов');
+        }
+        updateFields.password = await bcrypt.hash(password, 10);
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(userId, updateFields, {new: true});
+    if(!updatedUser){
+        throw new Error('Пользователь не найден');
+    }
+
+    return updatedUser;
+}
+
+async function deleteUserByAdmin(userId){
+    const deletedUser = await User.findByIdAndDelete(userId);
+    if(!deletedUser) throw new Error('Пользователь не найден');
+    return true;
+}
+
+async function updateOwnPassword(userId, oldPassword, newPassword){
+    if(!oldPassword || !newPassword){
+        throw new Error('Необходимо указать старый и новый пароли');
+    }
+
+    if(newPassword.length < 6){
+        throw new Error('Новый пароль должен быть не менее 6 символов');
+    }
+
+    const user = await User.findById(userId);
+    if(!user){
+        throw new Error('Пользователь не найден');
+    }
+
+    const isMatch = await bcrypt.compare(oldPassword, user.password);
+    if(!isMatch){
+        throw new Error('Старый пароль введен неверно');
+    }
+
+    user.password = await bcrypt.hash(newPassword, 10);
+    await user.save();
+
+    return true;
+}
 
 
 module.exports = {
     register, 
     login,
-
+    updateUserByAdmin, 
+    deleteUserByAdmin,
+    getAllUsers,
+    updateOwnPassword
 };
