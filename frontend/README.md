@@ -73,3 +73,7 @@ export default defineConfig([
 ])
 
 ```
+
+
+
+К выполнению (Todo), В работе (In Progress), На проверке (Review), Выполнена (Done)
