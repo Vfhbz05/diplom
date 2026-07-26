@@ -15,6 +15,10 @@ const taskLogSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
+    burnedOut: { 
+        type: Boolean, 
+        default: false 
+    },
     createdAt: {
         type: Date,
         default: Date.now
@@ -33,7 +37,7 @@ const taskSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ['Todo', 'inProgress', 'Review', 'Done'],
+        enum: ['Todo', 'InProgress', 'Review', 'Done', 'InRevision'],
         default: 'Todo'
     },
     estimatedTime: {
@@ -41,6 +45,10 @@ const taskSchema = new mongoose.Schema({
         default: 0
     },
     totalDuration: {
+        type: Number,
+        default: 0
+    },
+    cost: {
         type: Number,
         default: 0
     },
@@ -52,6 +60,10 @@ const taskSchema = new mongoose.Schema({
     assignedTodo: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
+    },
+    assignedAt: {
+        type: Date,
+        default: null 
     },
     timeLogs: [taskLogSchema],
     createdAt: {

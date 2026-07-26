@@ -16,10 +16,10 @@ const router = express.Router();
 
 router.post('/', isAuth, hasRole([ROLE.ADMIN, ROLE.MODERATOR]), async (req, res) => {
     try{
-        const { name, description, horlyRate } = req.body;
+        const { name, description } = req.body;
         const ownerId = req.user._id;
 
-        const project = await createProject(name, description, horlyRate, ownerId);
+        const project = await createProject(name, description, ownerId);
 
         res.status(201).send({ error: null, project });
     } catch(err){

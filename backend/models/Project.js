@@ -23,11 +23,7 @@ const projectSchema = new mongoose.Schema({
     team : [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
-    }],
-    createdAt: {
-        type: Date,
-        default: Date.now
-    }
-});
+    }]
+}, { timestamps: true });
 
 module.exports = mongoose.model('Project', projectSchema);

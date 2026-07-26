@@ -27,9 +27,9 @@ router.get('/', isAuth, hasRole([ROLE.ADMIN]), async (req, res) => {
 router.patch('/:id', isAuth, hasRole([ROLE.ADMIN]), async (req, res) => {
     try{
         const userId = req.params.id;
-        const { na,e, password, role } = req.body;
+        const { name, password, role, hourlyRate } = req.body;
 
-        const updatedUser = await updateUserByAdmin(userId, { name, password, role });
+        const updatedUser = await updateUserByAdmin(userId, { name, password, role, hourlyRate });
         res.send({ error: null, user: mapUser(updatedUser) });
     } catch(err){
         res.status(400).send({error: err.message || 'Неизвестная ошибка'});

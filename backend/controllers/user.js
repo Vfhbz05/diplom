@@ -8,8 +8,8 @@ async function register(name, email, password){
 
     const candidate = await User.findOne({ email });
      if(candidate){
-            return res.status(400).json({ message: 'Пользователь с таким Email уже зарегистрирован'});
-        }
+        throw new Error('Пользователь с таким Email уже зарегистрирован');
+    }
 
     const passwordHash = await bcrypt.hash(password, 10);
     const user = await User.create({ name, email, password: passwordHash});
@@ -38,15 +38,22 @@ async function login(email, password){
 }
 
 async function getAllUsers(){
-    return await User.find().sort({ createdAt: -1})
+    return await User.find({}, '-password').sort({ createdAt: -1})
 }
 
 async function updateUserByAdmin(userId, newData){
-    const { name, password, role } = newData;
+    const { name, password, role, hourlyRate } = newData;
     const updateFields = {};
 
     if(name){ updateFields.name = name; }
     if(role){ updateFields.role = role; }
+
+    if(hourlyRate !== undefined) {
+        if(hourlyRate < 0) {
+            throw new Error('Почасовая ставка не может быть отрицательной');
+        }
+        updateFields.hourlyRate = hourlyRate;
+    }
 
     if(password){
         if(password.length < 6){
@@ -55,7 +62,7 @@ async function updateUserByAdmin(userId, newData){
         updateFields.password = await bcrypt.hash(password, 10);
     }
 
-    const updatedUser = await User.findByIdAndUpdate(userId, updateFields, {new: true});
+    const updatedUser = await User.findByIdAndUpdate(userId, updateFields, {new: true, runValidators: true});
     if(!updatedUser){
         throw new Error('Пользователь не найден');
     }

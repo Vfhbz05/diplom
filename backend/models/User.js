@@ -23,6 +23,11 @@ const userSchema = new mongoose.Schema({
         type: String,
         default: ROLE.USER
     },
+    hourlyRate: {
+        type: Number,
+        default: 0, 
+        min: [0, 'Ставка не может быть отрицательной']
+    },
     createdAt: {
         type: Date,
         default: Date.now

@@ -1,8 +1,9 @@
 const ROLE = require('../constants/role');
 const Project = require('../models/Project');
+const Task = require('../models/Task');
 const User = require('../models/User');
 
-async function createProject(name, description, hourlyRate, ownerId){
+async function createProject(name, description, ownerId){
     if(!name){
         throw new Error('Название проекта обязательно');
     }
@@ -10,7 +11,6 @@ async function createProject(name, description, hourlyRate, ownerId){
     const project = await Project.create({
         name,
         description,
-        hourlyRate: hourlyRate || 0,
         owner: ownerId,
         team: [ownerId]
     });
@@ -58,8 +58,24 @@ async function removeMember(projectId, userIdToRemove){
     }
 
     project.team = project.team.filter(memberId => memberId.toString() !== userIdToRemove.toString());
-
+    
     await project.save();
+    
+    const tasks = await Task.find({ project: projectId });
+
+    for(let i = 0; i < tasks.length; i++){
+        const currentTask = tasks[i];
+
+        if(
+            currentTask.assignedTodo?.toString() === userIdToRemove.toString() 
+            && currentTask.status !== 'Done'){
+                currentTask.assignedTodo = project.owner;
+                currentTask.status = 'Todo';
+        }
+
+        await currentTask.save();
+    }
+    
     return project;
 }
 
