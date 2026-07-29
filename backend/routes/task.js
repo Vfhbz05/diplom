@@ -1,5 +1,6 @@
 const express = require('express');
 const isAuth = require('../middlewares/isAuth');
+const hasRole = require('../middlewares/hasRole');
 const { 
     createTask,
     getProjectTasks,
