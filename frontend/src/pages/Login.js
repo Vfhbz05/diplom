@@ -10,6 +10,7 @@ import { loginUser } from "../actions";
 import { selectCurrentUserId } from "../selectors";
 import { request } from "../utils/request";
 import { InputGroup } from "../components";
+import { Logo } from "../components/header/Logo";
 
 const loginFormSchema = yup.object().shape({
     email: yup  
@@ -60,36 +61,41 @@ const LoginContainer = ({ className }) => {
 
     return (
         <div className={className}>
-            <div className = 'login-card'>
-                <h1 className = 'login-title'>Вход в систему</h1>
-                <p className="login-subtitle">Управляйте проектами и фиксируйте рабочее время</p>
+            <div className="auth-page-wrapper">
+                <div className="auth-logo-container">
+                    <Logo />
+                </div>
+                <div className = 'login-card'>
+                    <h1 className = 'login-title'>Вход в систему</h1>
+                    <p className="login-subtitle">Управляйте проектами и фиксируйте рабочее время</p>
 
-                <form onSubmit = {handleSubmit(onSubmit)}>
-                    <InputGroup
-                        id = 'email'
-                        label = 'Электронная почта'
-                        type = 'email'
-                        placeholder="example@company.com"
-                        {...register("email", { onChange: () => setServerError(null) })}
-                    />
+                    <form onSubmit = {handleSubmit(onSubmit)}>
+                        <InputGroup
+                            id = 'email'
+                            label = 'Электронная почта'
+                            type = 'email'
+                            placeholder="example@company.com"
+                            {...register("email", { onChange: () => setServerError(null) })}
+                        />
 
-                    <InputGroup
-                        id="password"
-                        label="Пароль"
-                        type="password"
-                        placeholder="*********"
-                        {...register("password", { onChange: () => setServerError(null) })}
-                    />
+                        <InputGroup
+                            id="password"
+                            label="Пароль"
+                            type="password"
+                            placeholder="*********"
+                            {...register("password", { onChange: () => setServerError(null) })}
+                        />
 
-                    <button className="submit-button" type = 'submit' disabled = {!!formError}>
-                        Войти в аккаунт
-                    </button>
+                        <button className="submit-button" type = 'submit' disabled = {!!formError}>
+                            Войти в аккаунт
+                        </button>
 
-                    {errorMessage && <div className="auth-form-error">{errorMessage}</div>}
-                </form>
-                <p className = 'login-footer'>
-                    Ещё нет аккаунта? <Link to='/register'>Зарегистрироваться</Link>
-                </p>
+                        {errorMessage && <div className="auth-form-error">{errorMessage}</div>}
+                    </form>
+                    <p className = 'login-footer'>
+                        Ещё нет аккаунта? <Link to='/register'>Зарегистрироваться</Link>
+                    </p>
+                </div>
             </div>
         </div>
     );
@@ -103,6 +109,7 @@ export const Login = styled(LoginContainer)`
     display: flex;
     align-items: center;
     justify-content: center;
+    flex: 1;
     width: 100%;
     height: 100%;
     font-family: system-ui, -apple-system, sans-serif;
@@ -110,6 +117,18 @@ export const Login = styled(LoginContainer)`
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+
+    & .auth-page-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+  }
+
+  & .auth-logo-container {
+    margin-bottom: 24px;
+    transform: scale(1.2); 
+  }
 
      & .login-card {
     background: #ffffff;

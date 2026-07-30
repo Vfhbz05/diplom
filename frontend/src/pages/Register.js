@@ -10,6 +10,7 @@ import { loginUser } from "../actions";
 import { selectCurrentUserId } from "../selectors";
 import { request } from "../utils/request";
 import { InputGroup } from "../components";
+import { Logo } from "../components/header/Logo";
 
 const regFormSchema = yup.object().shape({
     name: yup
@@ -75,52 +76,57 @@ const RegisterContainer = ({ className }) => {
 
     return(
         <div className={className}>
-            <div className="register-card">
-                <h1 className="register-title">Регистрация</h1>
-                <p className="register-subtitle">Создайте аккаунт для совместной работы</p>
+            <div className="auth-page-wrapper">
+                <div className="auth-logo-container">
+                    <Logo />
+                </div>
+                <div className="register-card">
+                    <h1 className="register-title">Регистрация</h1>
+                    <p className="register-subtitle">Создайте аккаунт для совместной работы</p>
 
-                <form onSubmit={handleSubmit(onSubmit)}>
-                    <InputGroup
-                        id="name"
-                        label="Имя и фамилия"
-                        type="text"
-                        placeholder="Мясникова Мария"
-                        {...register("name", { onChange: () => setServerError(null) })}
-                    />
+                    <form onSubmit={handleSubmit(onSubmit)}>
+                        <InputGroup
+                            id="name"
+                            label="Имя и фамилия"
+                            type="text"
+                            placeholder="Мясникова Мария"
+                            {...register("name", { onChange: () => setServerError(null) })}
+                        />
 
-                    <InputGroup
-                        id="email"
-                        label="Электронная почта"
-                        type="email"
-                        placeholder="example@company.com"
-                        {...register("email", { onChange: () => setServerError(null) })}
-                    />
+                        <InputGroup
+                            id="email"
+                            label="Электронная почта"
+                            type="email"
+                            placeholder="example@company.com"
+                            {...register("email", { onChange: () => setServerError(null) })}
+                        />
 
-                    <InputGroup
-                        id="password"
-                        label="Пароль"
-                        type="password"
-                        placeholder="*********"
-                        {...register("password", { onChange: () => setServerError(null) })}
-                    />
+                        <InputGroup
+                            id="password"
+                            label="Пароль"
+                            type="password"
+                            placeholder="*********"
+                            {...register("password", { onChange: () => setServerError(null) })}
+                        />
 
-                    <InputGroup
-                        id="passcheck"
-                        label="Пароль"
-                        type="password"
-                        placeholder="*********"
-                        {...register("passcheck", { onChange: () => setServerError(null) })}
-                    />
+                        <InputGroup
+                            id="passcheck"
+                            label="Пароль"
+                            type="password"
+                            placeholder="*********"
+                            {...register("passcheck", { onChange: () => setServerError(null) })}
+                        />
 
-                    <button className="submit-button" type='submit' disabled = {!!formError}>
-                        Зарегистрироваться
-                    </button>
-                    {errorMessage && <div className="auth-form-error">{errorMessage}</div>}
-                </form>
+                        <button className="submit-button" type='submit' disabled = {!!formError}>
+                            Зарегистрироваться
+                        </button>
+                        {errorMessage && <div className="auth-form-error">{errorMessage}</div>}
+                    </form>
 
-                <p className="register-footer">
-                    Уже есть аккаунт? <Link to='/login'>Войти</Link>
-                </p>
+                    <p className="register-footer">
+                        Уже есть аккаунт? <Link to='/login'>Войти</Link>
+                    </p>
+                </div>
             </div>
         </div>
     );
@@ -135,6 +141,7 @@ export const Register = styled(RegisterContainer)`
   display: flex;
   align-items: center;
   justify-content: center;
+   flex: 1;
   width: 100%;
   height: 100%;
   font-family: system-ui, -apple-system, sans-serif;
@@ -142,6 +149,18 @@ export const Register = styled(RegisterContainer)`
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+
+  & .auth-page-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+  }
+
+  & .auth-logo-container {
+    margin-bottom: 24px;
+    transform: scale(1.2);
+  }
 
   & .register-card {
     background: #ffffff;
