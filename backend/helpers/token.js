@@ -1,13 +1,13 @@
 const jwt = require('jsonwebtoken');
-const sing = process.env.JWT_SECRET;
+const sign = process.env.JWT_SECRET;
 
 module.exports = {
     generate(data){
-        return jwt.sing(data, sing, { expiresIn: '30d' });
+        return jwt.sign(data, sign, { expiresIn: '30d' });
     },
     verify(token){
         try{
-            return jwt.verify(token, sing);
+            return jwt.verify(token, sign);
         } catch (err) {
             return null;
         }

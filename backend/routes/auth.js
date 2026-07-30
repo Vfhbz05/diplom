@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
 const mapUser = require('../helpers/mapUser');
+const { register, login } = require('../controllers/user');
 
 router.post('/register', async (req, res) => {
     try{

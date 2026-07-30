@@ -21,10 +21,10 @@ app.use(express.static('../frontend/build'));
 mongoose.connect(DB_URL).then(()=> console.log(chalk.blue('Успешное подключение к MongoDB!')))
     .catch((err)=> console.error(chalk.red('Ошибка подключения к MongoDB', err)));
 
-app.use('/api/auth', require('./routes/auth'));
-app.use('/api/users', require('./routes/user'));
-app.use('/api/projects', require('./routes/project'));
-app.use('/api/tasks', require('./routes/task'));
+app.use('/auth', require('./routes/auth'));
+app.use('/users', require('./routes/user'));
+app.use('/projects', require('./routes/project'));
+app.use('/tasks', require('./routes/task'));
 
 app.get('/', (req, res) => {
     res.send('Бэкенд работает и подключен к базе данных');
