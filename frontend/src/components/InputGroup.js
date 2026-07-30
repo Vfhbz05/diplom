@@ -1,11 +1,39 @@
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
+import { useState } from 'react';
 
-const InputGroupContainer = ({ className, label, id, ...props }) => {
+const InputGroupContainer = ({ className, label, id, type, register, ...props }) => {
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+
+  const isPasswordType = type === 'password';
+  const currentType = isPasswordType && isPasswordVisible ? 'text' : type;
+
+  const togglePasswordVisibility = (e) => {
+    e.preventDefault();
+    setIsPasswordVisible(!isPasswordVisible);
+  };
+
     return( 
         <div className={className}>
             {label && <label htmlFor={id}>{label}</label>}
-            <input id={id} {...props} />
+            <div className='input-container'>
+              <input 
+                id={id} 
+                type = {currentType}
+                {...register}
+                {...props} 
+              />
+              {isPasswordType && (
+                <button 
+                  type = 'button'
+                  className='toggle-password-btn'
+                  onClick = {togglePasswordVisibility}
+                  tabIndex='-1'
+                >
+                  {isPasswordVisible ? '🙈' : '👁️'}
+                </button>
+              )}
+            </div>
         </div>
     );
 };
@@ -14,7 +42,6 @@ export const InputGroup = styled(InputGroupContainer)`
   display: flex;
   flex-direction: column;
   margin-bottom: 20px;
-  /* Динамически меняем ширину, если её передали в пропсы */
   width: ${props => props.width || '100%'};
 
   & label {
@@ -25,9 +52,16 @@ export const InputGroup = styled(InputGroupContainer)`
     text-align: left;
   }
 
+  & .input-container {
+    position: relative; /* Делаем этот блок точкой отсчета для абсолютной позиции глазка */
+    display: flex;
+    align-items: center;
+    width: 100%;
+  }
+
   & input {
     font-size: 15px;
-    padding: 12px 16px;
+    padding: 12px 40px 12px 16px; 
     border: 1px solid #ced4da;
     border-radius: 8px;
     outline: none;
@@ -42,6 +76,25 @@ export const InputGroup = styled(InputGroupContainer)`
 
     &::placeholder {
       color: #adb5bd;
+    }
+  }
+  
+  & .toggle-password-btn {
+    position: absolute;
+    right: 14px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+    
+    &:hover {
+      opacity: 0.7;
     }
   }
 `;

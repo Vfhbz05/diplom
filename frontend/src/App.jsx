@@ -2,7 +2,7 @@ import { Routes, Route } from 'react-router-dom';
 //Navigate
 //import { useSelector } from 'react-redux';
 //import { selectCurrentUserId, selectCurrentUser } from './selectors';
-import { Page404, Register } from './pages';
+import { Login, Page404, Register } from './pages';
 
 function App() {
 
@@ -13,7 +13,7 @@ function App() {
   return (
     <Routes>
       <Route path = '/register' element = {< Register/>}/* {!userId ? <Register /> : < Navigate to = '/'/>}*//>
-      <Route path = '/login' element = {<div>Страница авторизации</div>}/*{!userId ? <Login /> : < Navigate to = '/'/>} *//>
+      <Route path = '/login' element = {<Login />}/*{!userId ? <Login /> : < Navigate to = '/'/>} *//>
 
       <Route path = '/' element = {<div>Страница  со всеми проектами</div>} /* {userId ? <Projects /> : <Navigate to = '/login'/>} *//>
       <Route path="/:projectId/tasks" element= {<div>Страница с внутренностями проекта</div>}/*{userId ? <ProjectTasks /> : <Navigate to="/login" />} */ />
