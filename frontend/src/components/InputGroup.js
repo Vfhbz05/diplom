@@ -8,33 +8,45 @@ const InputGroupContainer = ({ className, label, id, type, register, ...props })
   const isPasswordType = type === 'password';
   const currentType = isPasswordType && isPasswordVisible ? 'text' : type;
 
+  const isTextArea = type === 'textarea';
+
   const togglePasswordVisibility = (e) => {
     e.preventDefault();
     setIsPasswordVisible(!isPasswordVisible);
   };
 
     return( 
-        <div className={className}>
-            {label && <label htmlFor={id}>{label}</label>}
-            <div className='input-container'>
+      <div className={className}>
+        {label && <label htmlFor={id}>{label}</label>}
+          <div className='input-container'>
+            {isTextArea ? (
+              <textarea
+                id={id}
+                rows = '3'
+                {...register}
+                {...props}
+              />
+            ) : (
               <input 
                 id={id} 
                 type = {currentType}
                 {...register}
                 {...props} 
               />
-              {isPasswordType && (
-                <button 
-                  type = 'button'
-                  className='toggle-password-btn'
-                  onClick = {togglePasswordVisibility}
-                  tabIndex='-1'
-                >
-                  {isPasswordVisible ? '🙈' : '👁️'}
-                </button>
-              )}
-            </div>
-        </div>
+            )}
+
+            {isPasswordType && (
+              <button 
+                type = 'button'
+                className='toggle-password-btn'
+                onClick = {togglePasswordVisibility}
+                tabIndex='-1'
+              >
+                {isPasswordVisible ? '🙈' : '👁️'}
+              </button>
+            )}
+          </div>
+      </div>
     );
 };
 
@@ -79,6 +91,30 @@ export const InputGroup = styled(InputGroupContainer)`
     }
   }
   
+   & textarea {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    outline: none;
+    font-size: 15px;
+    font-family: inherit; /* Чтобы шрифт не менялся на стандартный моноширинный */
+    background-color: var(--bg);
+    color: var(--text-h);
+    box-sizing: border-box;
+    resize: vertical; /* Разрешаем растягивать поле только по вертикали, чтобы не ломать ширину карточки */
+    transition: border-color 0.2s, box-shadow 0.2s;
+
+    &:focus {
+      border-color: #007bff;
+      box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
+    }
+
+    &::placeholder {
+      color: #adb5bd;
+    }
+  }
+    
   & .toggle-password-btn {
     position: absolute;
     right: 14px;

@@ -10,7 +10,7 @@ import { loginUser } from "../actions";
 import { selectCurrentUserId } from "../selectors";
 import { request } from "../utils/request";
 import { InputGroup } from "../components";
-import { Logo } from "../components/header/Logo";
+import { Logo } from "../components";
 
 const regFormSchema = yup.object().shape({
     name: yup

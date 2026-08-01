@@ -10,7 +10,8 @@ const {
     updateTaskStatus,
     logTime
  } = require('../controllers/task');
- const ROLE = require('../constants/role');
+const { updateProjectProgress } = require('../controllers/project');
+const ROLE = require('../constants/role');
 const Task = require('../models/Task');
 const STATUS = require('../constants/status');
 const mapTask = require('../helpers/mapTask');
@@ -21,6 +22,8 @@ router.post('/', isAuth, async (req, res) => {
     try{
         const { title, description, estimatedTime, projectId } = req.body;
         const task = await createTask(title, description, estimatedTime, projectId, assignedTodo, req.user._id);
+
+        await updateProjectProgress(projectId);
 
         res.status(201).send({ error: null, task });
     } catch(err){
@@ -39,7 +42,18 @@ router.get('/project/:projectId', isAuth, async (req, res) => {
 
 router.delete('/:id', isAuth, hasRole([ROLE.ADMIN, ROLE.MODERATOR]), async (req, res) => {
     try{
+        const task = await Task.findById(req.params.id);
+        if(!task){
+            return res.status(404).send({ error: 'Задача не найдена' });
+        }
+        const projectId = task.project;
+
         await deleteTask(req.params.id);
+
+        if(projectId){
+            await updateProjectProgress(projectId);
+        }
+
         res.send({ error: null, success: true });
     } catch(err){
         res.status(400).send({ error: err.message });
@@ -94,7 +108,13 @@ router.patch('/:id/status', isAuth, async (req, res) => {
         const { status } = req.body;
         const updatedTask = await updateTaskStatus( req.params.id, status, req.user);
 
-        res.send({ error: null, task: updatedTask });
+        let newProgress = 0;
+
+        if(updatedTask && updatedTask.project){
+            newProgress = await updateProjectProgress(updatedTask.project);
+        }
+        
+        res.send({ error: null, task: updatedTask, projectProgress: newProgress });
     } catch(err){
         res.status(400).send({ error: err.message });
     }

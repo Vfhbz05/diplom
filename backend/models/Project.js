@@ -10,11 +10,16 @@ const projectSchema = new mongoose.Schema({
         type: String,
         trim: true
     },
-    hourlyRate: {
+    deadline: {
+        type: Date,
+        required: [true, 'Дата сдачи проекта обязательна']
+    }, 
+    progress: {
         type: Number,
         default: 0,
-        min: [0, 'Ставка не может быть отрицательной']
-    }, 
+        min: 0,
+        max: 100
+    },
     owner: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
