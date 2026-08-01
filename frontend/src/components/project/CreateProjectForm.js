@@ -1,10 +1,11 @@
 import { useForm } from "react-hook-form";
+import { useDispatch } from "react-redux";
 import { InputGroup } from "../InputGroup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { request } from "../../utils/request";
 import * as yup from "yup";
 import { useState } from "react";
 import styled from "styled-components";
+import { createNewProject } from "../../actions";
 
 const projectFormSchema = yup.object().shape({
     name: yup
@@ -14,14 +15,15 @@ const projectFormSchema = yup.object().shape({
         .max(100, 'Максимум 100 символов для названия'),
     description: yup
         .string()
-        .max(150, 'Описание слишком длинное (максимум 150 символов)'),
+        .max(500, 'Описание слишком длинное (максимум 500 символов)'),
      deadline: yup
         .string()
         .required("Укажите дату сдачи проекта"),
 });
 
-export const CreateProjectForm = ({ projects, setProjects }) => {
+export const CreateProjectForm = () => {
     const [serverError, setServerError] = useState(null); 
+    const dispatch = useDispatch();
     const {
         register,
         handleSubmit,
@@ -37,15 +39,12 @@ export const CreateProjectForm = ({ projects, setProjects }) => {
         });
 
     const onSubmit = ({ name, description, deadline }) => {
-            request('/projects', 'POST', {name, description, deadline})
+            dispatch(createNewProject({ name, description, deadline }))
                 .then((data) => {
-                    if(data.error){
+                    if(data && data.error){
                         setServerError(`Не удалось создать проект: ${data.error}`);
                         return;
                     }
-    
-                    const createdProject = data.project;
-                    setProjects([...projects, createdProject]);
                     reset();
                 }).catch((err)=> setServerError(`Ошибка при создании: ${err.message}`));
         }; 

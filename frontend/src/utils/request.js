@@ -9,7 +9,10 @@ export async function request (url, method = 'GET', data = null){
         },
     };
 
+    options.credentials = 'include';
+
     if(data){
+        options.headers["Content-Type"] = "application/json";
         options.body = JSON.stringify(data);
     }
 

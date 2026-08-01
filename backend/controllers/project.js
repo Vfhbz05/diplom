@@ -24,14 +24,14 @@ async function getProjects(userId, userRole){
 
     if(userRole === ROLE.ADMIN){
         return await Project.find()
-            .populate('owner', 'email')
-            .populate('team', 'email');
+            .populate('owner', 'name email')
+            .populate('team', 'name email');
     }
 
     return await Project.find()
         .or([{ owner: userId }, { team: userId }])
-        .populate('owner', 'email')
-        .populate('team', 'email');
+        .populate('owner', 'name email')
+        .populate('team', 'name email');
 }
 
 async function addMember(project, email){
@@ -76,16 +76,20 @@ async function removeMember(project, userIdToRemove){
     return project;
 }
 
-async function changeOwner(project, newOwnerId){
-    const userExists = await User.exists({ _id: newOwnerId });
+async function changeOwner(project, email){
+    if (!email || !email.includes('@')) {
+        throw new Error('Укажите корректный Email нового владельца');
+    }
+
+    const userExists = await User.exists({ email: email.trim().toLowerCase() });
     if(!userExists){
         throw new Error('Новый владелец не найден в системе');
     }
 
-    project.owner = newOwnerId;
+    project.owner = user._id;
 
-    if(!project.team.includes(newOwnerId)){
-        project.team.push(newOwnerId);
+    if(!project.team.includes(user._id)){
+        project.team.push(user._id);
     }
 
     await project.save();

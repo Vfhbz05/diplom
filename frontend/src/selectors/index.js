@@ -1,3 +1,2 @@
-export * from './userSelector';
-export * from './userIdSelector';
-export * from './userNameSelector';
+export * from './user-selectors';
+export * from './project-selectors';

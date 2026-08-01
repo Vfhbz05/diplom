@@ -6,8 +6,11 @@ export const addProject = (project) => ({ type: ACTION_TYPES.ADD_PROJECT, payloa
 export const removeProject = (projectId) => ({ type: ACTION_TYPES.REMOVE_PROJECT, payload: projectId});
 export const updateProjectInList = (updatedProject) => ({ type: ACTION_TYPES.UPDATE_PROJECT, payload: updatedProject});
 export const setProjectsError = (error) => ({ type: ACTION_TYPES.SET_PROJECTS_ERROR, payload: error});
+export const fetchProjectsStart = () => ({ type: ACTION_TYPES.FETCH_PROJECTS_START});
 
 export const fetchProjects = () => (dispatch) => {
+    dispatch(fetchProjectsStart());
+
     return request('/projects', 'GET')
         .then((data)=> {
             if(data.error){
@@ -67,8 +70,8 @@ export const removeProjectMember = (projectId, userIdToRemove) => (dispatch) => 
     });
 };
 
-export const updateProjectOwner = (projectId, newOwnerId) => (dispatch) => {
-    return request(`/projects/${projectId}/owner`, 'PATCH', { newOwnerId }).then((data) => {
+export const updateProjectOwner = (projectId, email) => (dispatch) => {
+    return request(`/projects/${projectId}/owner`, 'PATCH', { email }).then((data) => {
         if(!data.error && data.project) {
             dispatch(updateProjectInList(data.project));
         }

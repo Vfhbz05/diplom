@@ -61,8 +61,8 @@ router.delete('/:id/members/:userId', isAuth, isProjectOwnerOrAdmin, async (req,
 
 router.patch('/:id/owner', isAuth, isProjectOwnerOrAdmin, async (req, res) => {
     try{
-        const { newOwnerId } = req.body;
-        const updatedProject = await changeOwner(req.project, newOwnerId);
+        const { email } = req.body;
+        const updatedProject = await changeOwner(req.project, email);
         res.send({ error: null, project: updatedProject});
     } catch(err){
         res.status(400).send({ error: err.message });

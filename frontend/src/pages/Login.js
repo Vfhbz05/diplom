@@ -41,16 +41,22 @@ const LoginContainer = ({ className }) => {
     const userId = useSelector(selectCurrentUserId);
 
     const onSubmit = ({ email, password }) => {
+        setServerError(null);
         request('/auth/login', 'POST', { email, password })
             .then(({ error, user }) => {
                 if(error){
                     setServerError(`Ошибка авторизации: ${error}`);
                     return;
                 }
+
                 dispatch(loginUser(user));
                 sessionStorage.setItem('userData', JSON.stringify(user));
+            }).catch((err) => {
+
+                setServerError(`Системная ошибка сети: ${err.message}`);
             });
     };
+    
 
     const formError = errors?.email?.message || errors?.password?.message;
     const errorMessage = formError || serverError;

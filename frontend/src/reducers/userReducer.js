@@ -2,7 +2,7 @@ import { ACTION_TYPES } from "../constants/actionTypes";
 
 const initialState = {
     user: {
-        id: null,
+        _id: null,
         email: null,
         role: null,
         name: null,

@@ -15,6 +15,8 @@ const InputGroupContainer = ({ className, label, id, type, register, ...props })
     setIsPasswordVisible(!isPasswordVisible);
   };
 
+  const registerProps = register || {};
+
     return( 
       <div className={className}>
         {label && <label htmlFor={id}>{label}</label>}
@@ -25,6 +27,7 @@ const InputGroupContainer = ({ className, label, id, type, register, ...props })
                 rows = '3'
                 {...register}
                 {...props}
+                {...registerProps}
               />
             ) : (
               <input 
@@ -32,6 +35,7 @@ const InputGroupContainer = ({ className, label, id, type, register, ...props })
                 type = {currentType}
                 {...register}
                 {...props} 
+                {...registerProps}
               />
             )}
 
