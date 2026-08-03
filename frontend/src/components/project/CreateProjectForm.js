@@ -1,11 +1,11 @@
 import { useForm } from "react-hook-form";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { InputGroup } from "../InputGroup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useState } from "react";
 import styled from "styled-components";
-import { createNewProject } from "../../actions";
+import { createNewProject,closeCreateModal } from "../../actions";
 
 const projectFormSchema = yup.object().shape({
     name: yup
@@ -24,6 +24,8 @@ const projectFormSchema = yup.object().shape({
 export const CreateProjectForm = () => {
     const [serverError, setServerError] = useState(null); 
     const dispatch = useDispatch();
+    const isOpen = useSelector((state) => state.projects.isCreateModalOpen);
+
     const {
         register,
         handleSubmit,
@@ -38,6 +40,8 @@ export const CreateProjectForm = () => {
             resolver: yupResolver(projectFormSchema),
         });
 
+    if (!isOpen) return null;
+
     const onSubmit = ({ name, description, deadline }) => {
             dispatch(createNewProject({ name, description, deadline }))
                 .then((data) => {
@@ -49,82 +53,143 @@ export const CreateProjectForm = () => {
                 }).catch((err)=> setServerError(`Ошибка при создании: ${err.message}`));
         }; 
 
+    const handleClose = () => {
+        reset();
+        setServerError(null);
+        dispatch(closeCreateModal());
+    };
+
     const formError = errors?.name?.message || errors?.description?.message || errors?.deadline?.message;
     const errorMessage = formError || serverError;
 
     return (
-        <Container>
-            <form className = 'create-project-form' onSubmit={handleSubmit(onSubmit)}>
-                <div className="form-inputs">
-                    <InputGroup
-                        id = 'name'
-                        label = 'Название проекта'
-                        type = 'text'
-                        placeholder = 'Например: Построение 3D модели машины для картинга'
-                        register = {register('name', {onChange: () => setServerError(null)})}
-                    />
-
-                    <InputGroup 
-                        id = 'description'
-                        label = 'Описание проекта'
-                        type = 'textarea'
-                        placeholder = 'Кратко опишите цели или технологии...'
-                        register = {register('description', {onChange: () => setServerError(null)})}
-                    />
-
-                    <InputGroup 
-                        id = 'deadline'
-                        label = 'Дата сдачи проекта'
-                        type = 'date'
-                        register = {register('deadline', {onChange: () => setServerError(null)})}
-                    />
+        <ModalOverlay onClick={handleClose}>
+             <ModalContent onClick={(e) => e.stopPropagation()}>
+                <div className="modal-header">
+                    <h2>Новый проект</h2>
+                    <button className="close-x-btn" onClick={handleClose}>&times;</button>
                 </div>
-                <button type = 'submit' className = 'submit-project-btn' disabled = {!!formError}>
-                    Создать проект
-                </button>
-            </form>
-            {errorMessage && <div className="error-message">{errorMessage}</div>}
-        </Container>
+                <form className='create-project-form' onSubmit={handleSubmit(onSubmit)}>
+                        <div className="form-inputs">
+                        <InputGroup
+                            id='name'
+                            label='Название проекта'
+                            type='text'
+                            placeholder='Например: Построение 3D модели машины для картинга'
+                            register={register('name', { onChange: () => setServerError(null) })}
+                        />
+                        <InputGroup
+                            id='description'
+                            label='Описание проекта'
+                            type='textarea'
+                            placeholder='Кратко опишите цели или технологии...'
+                            register={register('description', { onChange: () => setServerError(null) })}
+                        />
+                        <InputGroup
+                            id='deadline'
+                            label='Дата сдачи проекта'
+                            type='date'
+                            register={register('deadline', { onChange: () => setServerError(null) })}
+                        />
+                        </div>
+                        
+                        <div className="form-actions-row">
+                        <button type='submit' className='submit-project-btn' disabled={!!formError}>
+                            Создать проект
+                        </button>
+                        <button type='button' className='cancel-project-btn' onClick={handleClose}>
+                            Отмена
+                        </button>
+                        </div>
+                    </form>
+                    {errorMessage && <div className="error-message">{errorMessage}</div>}
+             </ModalContent>
+        </ModalOverlay>
     );
 };
 
-const Container = styled.div`
+const ModalOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(29, 53, 87, 0.4);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999; 
+`;
+
+
+const ModalContent = styled.div`
+  background: #ffffff;
+  padding: 32px;
+  border-radius: 16px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  max-width: 550px;
   width: 100%;
-  margin-bottom: 40px;
+  box-sizing: border-box;
+  animation: fadeIn 0.25s ease-out;
+
+  & .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    border-bottom: 1px solid #e1e4e8;
+    padding-bottom: 12px;
+
+    & h2 { margin: 0; font-size: 24px; color: #1d3557; font-weight: 700; }
+    
+    & .close-x-btn {
+      background: none;
+      border: none;
+      font-size: 28px;
+      color: #868e96;
+      cursor: pointer;
+      line-height: 1;
+      padding: 0;
+      &:hover { color: #212529; }
+    }
+  }
 
   & .create-project-form {
     display: flex;
     flex-direction: column;
     gap: 16px;
-    max-width: 600px;
-    width: 100%;
-
-    & .form-inputs {
-      display: flex;
-      flex-direction: column;
-      width: 100%;
-    }
+    
+    & .form-inputs { display: flex; flex-direction: column; width: 100%; }
   }
 
-  & .submit-project-btn {
-    align-self: flex-start;
-    padding: 12px 24px;
-    background-color: var(--accent);
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: opacity 0.2s;
+  & .form-actions-row {
+    display: flex;
+    gap: 12px;
+    margin-top: 10px;
 
-    &:hover:not(:disabled) {
-      opacity: 0.9;
+    & button {
+      flex: 1;
+      padding: 14px;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s;
     }
-    
-    &:disabled {
-      background-color: var(--border);
-      cursor: not-allowed;
+
+    & .submit-project-btn {
+      background-color: #007bff;
+      color: #fff;
+      &:hover:not(:disabled) { background-color: #0056b3; }
+      &:disabled { background-color: #ced4da; cursor: not-allowed; }
+    }
+
+    & .cancel-project-btn {
+      background-color: #e9ecef;
+      color: #495057;
+      &:hover { background-color: #dee2e6; }
     }
   }
 
@@ -135,8 +200,12 @@ const Container = styled.div`
     border-radius: 8px;
     margin-top: 16px;
     border: 1px solid rgba(239, 68, 68, 0.2);
-    max-width: 600px;
-    text-align: left;
     font-size: 14px;
+    text-align: left;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
   }
 `;

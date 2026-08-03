@@ -1,18 +1,19 @@
 import { useDispatch, useSelector } from "react-redux";
 import { removeProjectFromServer } from "../../actions";
 import {
-  selectProjectItems,
   selectCurrentUserRole,
   selectCurrentUserId,
+  selectProjectItems,
 } from "../../selectors";
 import { useState } from "react";
 import { EditOwner, EditProjectForm, StandartProjectCard } from "../projectList";
 import styled from "styled-components";
+import PropTypes from "prop-types";
 
-export const ProjectList = () => {
+export const ProjectList = ({ filteredProjects }) => {
   const dispatch = useDispatch();
 
-  const projects = useSelector(selectProjectItems);
+  const allProjects = useSelector(selectProjectItems); 
   const currentUserId = useSelector(selectCurrentUserId);
   const currentUserRole = useSelector(selectCurrentUserRole);
 
@@ -45,24 +46,32 @@ export const ProjectList = () => {
     dispatch(removeProjectFromServer(projectId));
   };
 
+  const isDatabaseEmpty = allProjects.length === 0;
+
   return (
     <ListGridContainer>
-      {projects.length === 0 ? (
-        <div className="empty-state">
-          У вас пока ни одного проекта. Заполните поля выше, чтобы создать
-          первый!
-        </div>
+      {filteredProjects.length === 0 ? (
+        isDatabaseEmpty ? (
+            <div className="empty-state">
+                У вас пока ни одного проекта.  Нажмите кнопку «Создать проект» в шапке, чтобы добавить первый!
+            </div>
+        ) : (
+            <div className='empty-state search-empty'>
+                Проекты с таким названием не найдены. Попробуйте изменить запрос.
+            </div>
+        ) 
       ) : (
-        projects.map((project) => {
+        filteredProjects.map((project) => {
           const isEditing = editingProjectId === project._id;
           const isChangingOwner = changingOwnerProjectId === project._id;
 
-          const projectOwnerId =
-            typeof project.owner === "object"
-              ? project.owner._id
+          const projectOwnerId = typeof project.owner === "object"
+              ? project.projectOwnerId || project.owner?._id || project.owner?.id 
               : project.owner;
-          const isOwnerOrAdmin =
-            currentUserRole === "ADMIN" || projectOwnerId === currentUserId;
+
+          const isOwner  = projectOwnerId && currentUserId && (projectOwnerId.toString() === currentUserId.toString());
+          const isAdmin = currentUserRole === 'ADMIN';
+          const isOwnerOrAdmin = isAdmin || isOwner;
 
           return (
             <div
@@ -120,6 +129,10 @@ export const ProjectList = () => {
   );
 };
 
+ProjectList.propTypes = {
+  filteredProjects: PropTypes.array.isRequired,
+};
+
 const ListGridContainer = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
@@ -159,7 +172,7 @@ const ListGridContainer = styled.div`
     padding: 10px 16px;
     background: #f8f9fa;
     border-top: 1px solid #e1e4e8;
-    margin-top: auto; /* Прижимает панель строго к нижнему краю карточки */
+    margin-top: auto; 
 
     & .action-btn {
       background: none;
@@ -185,5 +198,12 @@ const ListGridContainer = styled.div`
     border-radius: 12px;
     font-size: 15px;
     background: #fafbfc;
+  }
+    & .empty-state.search-empty {
+    border: 1px solid #e1e4e8; 
+    background: #ffffff;      
+    color: #495057;          
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.01);
+    font-weight: 500;
   }
 `;

@@ -7,18 +7,17 @@ import { InputGroup } from "../InputGroup";
 export const EditOwner = ({ project, onCancel, onSuccess }) => {
   const dispatch = useDispatch();
 
-  const initialEmail =
-    typeof project.owner === "object" ? project.owner.email || "" : "";
+  const initialEmail = typeof project.owner === "object" ? project.owner.email || "" : "";
   const [newOwnerEmail, setNewOwnerEmail] = useState(initialEmail);
 
-  const handleSaveOwner = (projectId) => {
+  const handleSaveOwner = () => {
     if (!newOwnerEmail.trim() || !newOwnerEmail.includes("@")) {
       alert("Введите корректный Email нового владельца проекта");
       return;
     }
 
     dispatch(
-      updateProjectOwner(projectId, newOwnerEmail.trim().toLowerCase()),
+      updateProjectOwner(project._id, newOwnerEmail.trim().toLowerCase()),
     ).then((data) => {
       if (data && data.error) {
         alert(`Не удалось сменить владельца: ${data.error}`);

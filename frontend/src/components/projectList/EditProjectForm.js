@@ -15,14 +15,14 @@ export const EditProjectForm = ({ project, onCancel, onSuccess }) => {
 
   const dispatch = useDispatch();
 
-  const handleSaveEdit = (projectId) => {
+  const handleSaveEdit = () => {
     if (!editName.trim()) {
       alert("Название проекта обязательно для заполнения");
       return;
     }
 
     dispatch(
-      editProjectOnServer(projectId, {
+      editProjectOnServer(project._id, {
         name: editName.trim(),
         description: editDesc.trim(),
         deadline: editDeadline,
@@ -91,7 +91,6 @@ const EditFormContainer = styled.div`
   background: #ffffff;
   box-sizing: border-box;
 
-  /* Стилизуем кнопки действий внутри инлайн-формы */
   & .inline-form-actions {
     display: flex;
     gap: 10px;

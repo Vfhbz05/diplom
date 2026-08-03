@@ -7,6 +7,8 @@ export const removeProject = (projectId) => ({ type: ACTION_TYPES.REMOVE_PROJECT
 export const updateProjectInList = (updatedProject) => ({ type: ACTION_TYPES.UPDATE_PROJECT, payload: updatedProject});
 export const setProjectsError = (error) => ({ type: ACTION_TYPES.SET_PROJECTS_ERROR, payload: error});
 export const fetchProjectsStart = () => ({ type: ACTION_TYPES.FETCH_PROJECTS_START});
+export const openCreateModal = () => ({type: ACTION_TYPES.TOGGLE_CREATE_MODAL, payload: true});
+export const closeCreateModal = () => ({type: ACTION_TYPES.TOGGLE_CREATE_MODAL, payload: false});
 
 export const fetchProjects = () => (dispatch) => {
     dispatch(fetchProjectsStart());
@@ -25,10 +27,21 @@ export const fetchProjects = () => (dispatch) => {
         });
 };
 
-export const createNewProject = (projectData) => (dispatch) => {
+export const createNewProject = (projectData) => (dispatch, getState) => {
     return request('/projects', 'POST', projectData).then((data) => {
         if(!data.error && data.project){
-            dispatch(addProject(data.project));
+            const currentUser = getState().user.user;
+
+            const projectWithPopulatedOwner = {
+                ...data.project,
+                owner: {
+                _id: currentUser.id || currentUser._id,
+                name: currentUser.name,
+                email: currentUser.email
+                }
+            };
+
+            dispatch(addProject(projectWithPopulatedOwner));
         }
         return data;
     });

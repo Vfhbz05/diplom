@@ -158,7 +158,7 @@ async function logTime(taskId, duration, userId){
         createdAt: new Date()
     };
 
-    task.timeLogs.push(newLogs);
+    task.timeLogs.push(newLog);
     task.totalDuration += duration;
 
     task.cost = task.timeLogs.reduce((sum, log) => sum + (log.cost || 0), 0);

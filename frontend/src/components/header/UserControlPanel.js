@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { logoutUser } from "../../actions";
 import { selectCurrentUserName } from "../../selectors";
+import { openCreateModal } from "../../actions/project-actions";
 
 
 const PanelWrapper = styled.div`
@@ -70,23 +71,12 @@ export const UserControlPanel = () => {
         navigate("/login");
     };
 
-    const handleCreateNewProject = () => {
-    const title = prompt("Введите название нового проекта:");
-    if (title && title.trim()) {
-      alert(`Запрос на создание проекта "${title}" будет отправлен на бэкенд!`);
-    }
-  };
-
   return(
     <PanelWrapper>
-        <button 
-        className="create-project-btn" 
-        onClick={handleCreateNewProject}
-        title="Создать новый проект"
-      >
-        ➕
-      </button>
-
+      <ExpandableCreateButton onClick={() => dispatch(openCreateModal())} title="Создать новый проект">
+          <span className="plus-icon">＋</span> 
+          <span className="button-text">Создать проект</span>
+        </ExpandableCreateButton>
       <span className="user-name">Привет, <strong>{userName}</strong>!</span>
       
       <button className="logout-button" onClick={handleLogout}>
@@ -95,3 +85,54 @@ export const UserControlPanel = () => {
     </PanelWrapper>
   );
 }
+
+const ExpandableCreateButton = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  
+  width: 40px;
+  height: 40px;
+  padding: 0 12px; 
+  background-color: #007bff;
+  color: #ffffff;
+  border: none;
+  border-radius: 20px; 
+  cursor: pointer;
+  overflow: hidden; 
+  white-space: nowrap;
+
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.2s;
+
+  & .plus-icon {
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1;
+    display: inline-block;
+    min-width: 16px; 
+    text-align: center;
+  }
+
+  & .button-text {
+    font-size: 14px;
+    font-weight: 600;
+    margin-left: 8px; 
+    opacity: 0; 
+    transition: opacity 0.2s ease-in-out;
+  }
+
+  &:hover {
+    background-color: #0056b3;
+    width: 160px;
+    border-radius: 8px;
+
+    & .button-text {
+      opacity: 1;
+      transition-delay: 0.1s; 
+    }
+  }
+
+  &:active {
+    transform: scale(0.96);
+  }
+`;

@@ -3,6 +3,7 @@ const Project = require('../models/Project');
 const Task = require('../models/Task');
 const User = require('../models/User');
 const STATUS = require('../constants/status');
+const { search } = require('../routes/project');
 
 async function createProject(name, description, ownerId, deadline){
     if(!name){
@@ -21,7 +22,6 @@ async function createProject(name, description, ownerId, deadline){
 }
 
 async function getProjects(userId, userRole){
-
     if(userRole === ROLE.ADMIN){
         return await Project.find()
             .populate('owner', 'name email')

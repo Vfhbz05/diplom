@@ -20,7 +20,7 @@ const router = express.Router();
 
 router.post('/', isAuth, async (req, res) => {
     try{
-        const { title, description, estimatedTime, projectId } = req.body;
+        const { title, description, estimatedTime, projectId, assignedTodo } = req.body;
         const task = await createTask(title, description, estimatedTime, projectId, assignedTodo, req.user._id);
 
         await updateProjectProgress(projectId);
@@ -62,12 +62,12 @@ router.delete('/:id', isAuth, hasRole([ROLE.ADMIN, ROLE.MODERATOR]), async (req,
 
 router.patch('/:id', isAuth, async (req,res) => {
     try{
-        const task = Task.findById(req.params.id).populate('project');
+        const task = await Task.findById(req.params.id).populate('project');
         if(!task){
             return res.status(404).send({ error: 'Задача не найдена' });
         }
 
-        const isProjectOwner = task.projection.owner.toString() === req.user._id.toString();
+        const isProjectOwner = task.project.owner.toString() === req.user._id.toString();
         const isManagement = [ROLE.ADMIN].includes(req.user.role);
 
         if(!isProjectOwner && !isManagement){
@@ -147,7 +147,7 @@ router.get('/my-work', isAuth, async (req, res) => {
     }
 });
 
-router.get('my-reviews', isAuth, async (req, res) => {
+router.get('/my-reviews', isAuth, async (req, res) => {
     try{
         const userId = req.user._id;
 

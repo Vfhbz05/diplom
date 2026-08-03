@@ -4,10 +4,16 @@ const initialState = {
     items: [],
     error: null,
     isLoading: false,
+    isCreateModalOpen: false,
 };
 
 export function projectsReducer(state = initialState, {type, payload}){
     switch(type){
+        case ACTION_TYPES.TOGGLE_CREATE_MODAL: 
+            return{
+                ...state,
+                isCreateModalOpen: payload
+            };
         case ACTION_TYPES.FETCH_PROJECTS_START:
             return{
                 ...state,
@@ -31,6 +37,7 @@ export function projectsReducer(state = initialState, {type, payload}){
             return{
                 ...state,
                 items: [...state.items, payload],
+                isCreateModalOpen: false
             };
         case ACTION_TYPES.REMOVE_PROJECT:
             return {

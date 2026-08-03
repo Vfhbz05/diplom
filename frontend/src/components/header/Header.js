@@ -3,42 +3,34 @@ import { Logo } from "./Logo";
 import { NotificationBell } from "./NotificationBell";
 import { UserControlPanel } from "./UserControlPanel";
 
-const HeaderContainer = ({ className }) => {
+export const Header = () => {
   return (
-    <div className={className}>
+    <HeaderContainer>
       <Logo/>
       <div className="right-side-controls">
+        
         <NotificationBell />
         <UserControlPanel />
       </div>
-    </div>
+    </HeaderContainer>
   );
 };
-
-export const Header = styled(HeaderContainer)`
+const HeaderContainer = styled.header`
   width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between; 
-  padding: 10px 24px;
-  border-bottom: 1px solid var(--border);
-  background: var(--bg);
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 16px 24px;
   box-sizing: border-box;
+  display: flex;
+  justify-content: space-between; 
+  align-items: center; 
+  background-color: #ffffff;
+  border-bottom: 1px solid #e1e4e8; 
 
   & .right-side-controls {
     display: flex;
     align-items: center;
     gap: 20px; 
   }
-
-  & .user-name {
-    font-size: 15px;
-    color: var(--text);
-    white-space: nowrap;
-    
-    & strong {
-      color: var(--text-h);
-      font-weight: 600;
-    }
-  }
 `;
+

@@ -3,7 +3,7 @@ const ROLE = require('../constants/role');
 
 module.exports = async (req, res, next) => {
     try{
-        const projectId = req.params._id;
+        const projectId = req.params.id;
         const currentUserId = req.user._id;
         const currentUserRole = req.user.role;
 
