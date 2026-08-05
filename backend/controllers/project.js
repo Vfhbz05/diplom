@@ -46,7 +46,13 @@ async function addMember(project, email){
 
     project.team.push(userToAdd._id);
     await project.save();
-    return project;
+
+    const populatedProject = await project.populate([
+        {path: 'owner', select: 'name email'},
+        {path: 'team', select: 'name email'}
+    ]);
+
+    return populatedProject;
 }
 
 async function removeMember(project, userIdToRemove){
@@ -54,11 +60,14 @@ async function removeMember(project, userIdToRemove){
         throw new Error('Нельзя удалить владельца проекта из команды');
     }
 
-    project.team = project.team.filter(memberId => memberId.toString() !== userIdToRemove.toString());
+    project.team = project.team.filter(member => {
+        const memberId = member._id ? member._id.toString() : member.toString();
+        return memberId !== userIdToRemove.toString();
+    });
     
     await project.save();
     
-    const tasks = await Task.find({ project: projectId });
+    const tasks = await Task.find({ project: project._id });
 
     for(let i = 0; i < tasks.length; i++){
         const currentTask = tasks[i];
@@ -73,7 +82,12 @@ async function removeMember(project, userIdToRemove){
         await currentTask.save();
     }
     
-    return project;
+    const populatedProject = await project.populate([
+        { path: 'owner', select: 'name email' },
+        { path: 'team', select: 'name email' }
+    ]);
+
+    return populatedProject;
 }
 
 async function changeOwner(project, email){
@@ -81,14 +95,15 @@ async function changeOwner(project, email){
         throw new Error('Укажите корректный Email нового владельца');
     }
 
-    const userExists = await User.exists({ email: email.trim().toLowerCase() });
-    if(!userExists){
+    const user = await User.findOne({ email: email.trim().toLowerCase() });
+    if(!user){
         throw new Error('Новый владелец не найден в системе');
     }
 
+    const oldOwnerId = project.owner;
     project.owner = user._id;
 
-    if(!project.team.includes(user._id)){
+    if (!project.team.includes(user._id)) {
         project.team.push(user._id);
     }
 

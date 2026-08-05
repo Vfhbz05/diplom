@@ -1,0 +1,120 @@
+import { useEffect } from "react";
+import { useParams, Link } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import styled from "styled-components";
+import { fetchProjects, fetchProjectTasks } from "../actions";
+import { selectProjectById, selectTasksError, selectTasksLoading} from "../selectors";
+import { KanbanBoard, TeamPanel } from "../components/";
+
+export const ProjectTasks = () => {
+    const { projectId } = useParams();
+    const dispatch = useDispatch();
+
+    const currentProject = useSelector(selectProjectById(projectId));
+    const isTasksLoading = useSelector(selectTasksLoading);
+    const tasksError = useSelector(selectTasksError);
+
+    useEffect(() => {
+        dispatch(fetchProjectTasks(projectId));
+
+        dispatch(fetchProjects()); 
+      
+    }, [projectId, dispatch]);
+
+   
+
+    if(isTasksLoading) return <CenteredStyle className="centred">⏳ Загрузка рабочего пространства проекта...</CenteredStyle>;
+    if (tasksError) return <CenteredStyle className="centred" style={{ color: '#dc2626' }}>❌ Ошибка: {tasksError}</CenteredStyle>;
+
+    return (
+        <BoardContainer>
+            <div className="board-header">
+                <Link to= '/'>← Вернуться к проектам</Link>
+                <div className="project-meta-info">
+                    <h1 className="project-main-title">
+                        {currentProject?.name || 'Рабочая область задач'}
+                    </h1>
+                    {currentProject?.progress !== undefined && (
+                        <span className="progress-badge">
+                            Прогресс: {currentProject.progress}%
+                        </span>
+                    )}
+                </div>
+            </div>
+            <TeamPanel />
+            <KanbanBoard />
+        </BoardContainer>
+  );
+};
+
+const BoardContainer = styled.div`
+  padding: 32px 12px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box; 
+  background-color: #f8fafc;
+  min-height: 100vh;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  box-sizing: border-box;
+
+  .board-header {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 28px;
+    padding: 0 16px; 
+
+    a {
+      text-decoration: none;
+      color: #64748b;
+      font-weight: 500;
+      font-size: 14px;
+      transition: color 0.15s ease;
+      width: fit-content;
+
+      &:hover {
+        color: #0f172a;
+      }
+    }
+  }
+
+  .project-meta-info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .project-main-title {
+    font-size: 26px;
+    color: #0f172a;
+    margin: 0;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+
+  .progress-badge {
+    background: #e2e8f0;
+    color: #334155;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+`;
+
+
+const CenteredStyle = styled.div`
+  &.centred {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    font-size: 15px;
+    color: #64748b;
+    font-weight: 500;
+    background-color: #f8fafc;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+`;

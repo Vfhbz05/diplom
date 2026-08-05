@@ -3,7 +3,7 @@ const STATUS = require("../constants/status");
 module.exports = function mapTask(task){
     const now = new Date();
 
-    const isOvertime = task.estimatedTime > 0 && task.totalDuration > task.estimatedTime;
+    const isOvertime = task.dueDate > 0 && task.totalDuration > task.dueDate;
 
     const targetDate = task.assignedAt || task.createdAt;
     const millisecondsInHour = 1000 * 60 * 60;
@@ -15,7 +15,7 @@ module.exports = function mapTask(task){
         title: task.title,
         description: task.description,
         status: task.status,
-        estimatedTime: task.estimatedTime,
+        dueDate: task.dueDate,
         totalDuration: task.totalDuration,
         cost: task.cost,
         project: task.project,

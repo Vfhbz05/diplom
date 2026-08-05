@@ -63,7 +63,8 @@ router.patch('/:id/owner', isAuth, isProjectOwnerOrAdmin, async (req, res) => {
     try{
         const { email } = req.body;
         const updatedProject = await changeOwner(req.project, email);
-        res.send({ error: null, project: updatedProject});
+        const populatedProject = await updatedProject.populate('owner', 'name email');
+        res.send({ error: null, project: populatedProject});
     } catch(err){
         res.status(400).send({ error: err.message });
     }

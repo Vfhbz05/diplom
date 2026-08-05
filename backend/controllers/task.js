@@ -4,7 +4,7 @@ const ROLE = require('../constants/role');
 const STATUS = require('../constants/status');
 const User = require('../models/User');
 
-async function createTask(title, description, estimatedTime, projectId, assignedTodo, userId){
+async function createTask(title, description, dueDate, projectId, assignedTodo, userId){
     const project = await Project.findById(projectId);
     if(!project){
         throw new Error('Проект не найден');
@@ -17,12 +17,13 @@ async function createTask(title, description, estimatedTime, projectId, assigned
     const task = await Task.create({
         title,
         description,
-        estimatedTime: estimatedTime || 0,
+        dueDate: dueDate || 0,
         project: projectId,
         assignedTodo: assignedTodo || userId,
         assignedAt: new Date()
     });
 
+    await task.populate('assignedTodo');
     return task;
 }
 
@@ -37,8 +38,8 @@ async function getProjectTasks(projectId, userId){
     }
 
     return await Task.find({ project: projectId })
-        .populate('assignedTodo', 'email')
-        .populate('timeLogs.user', 'email');
+        .populate('assignedTodo', 'name email')
+        .populate('timeLogs.user', 'name email');
 }
 
 async function deleteTask(taskId){
@@ -54,7 +55,7 @@ async function updateTask(taskId, updateData){
     delete updateData.timeLogs;
     delete updateData.totalDuration;
 
-    const task = await Task.findByIdAndUpdate(taskId, updateData, {new: true, runValidators: true});
+    const task = await Task.findByIdAndUpdate(taskId, updateData, {new: true, runValidators: true}).populate('assignedTodo');
     if(!task){
         throw new Error('Задача не найдена');
     }
@@ -75,18 +76,24 @@ async function updateExecutor(taskId, newExecutorId){
     }
 
     await task.save();
+    await task.populate('assignedTodo');
     return task;
 }
 
 async function updateTaskStatus(taskId, newStatus, user){
-    const task = await Task.findById(taskId);
+    const task = await Task.findById(taskId).populate('project').populate('assignedTodo');
     if(!task){
         throw new Error('Задача не найдена');
     }
 
     const currentStatus = task.status;
-    const isExecutor = task.assignedTodo?.toString() === user._id.toString();
+    const isExecutor = task.assignedTodo 
+  ? (task.assignedTodo?._id?.toString() === user._id?.toString() || 
+     task.assignedTodo?.toString() === user._id?.toString())
+  : false;
     const isManagement = [ROLE.ADMIN, ROLE.MODERATOR].includes(user.role);
+
+    const isProjectOwner = task.project && task.project.owner.toString() === user._id.toString();
 
     if(currentStatus === STATUS.TODO && newStatus === STATUS.IN_PROGRESS){
         if(!isExecutor){
@@ -100,13 +107,9 @@ async function updateTaskStatus(taskId, newStatus, user){
         if(!isExecutor){
             throw new Error('Отправить задачу на повторную проверку может только её исполнитель');
         }
-    } else if (currentStatus === STATUS.REVIEW && newStatus === STATUS.DONE){
-        if(!isManagement){
-            throw new Error('Завершить проверку и принять задачу может только модератор или админ');
-        }
-    } else if (currentStatus === STATUS.REVIEW && newStatus === STATUS.IN_REVISION){
-        if(!isManagement){
-            throw new Error('Вернуть задачу на доработку может только модератор или админ');
+    } else if (currentStatus === STATUS.REVIEW && newStatus === STATUS.DONE || newStatus === STATUS.IN_REVISION){
+        if(!isManagement && !isProjectOwner){
+            throw new Error('Вернуть задачу или завершить проверку и принять задачу может только модератор или админ');
         }
     } else {
     throw new Error(`Недопустимый переход из статуса ${currentStatus} в ${newStatus}`);
@@ -146,9 +149,9 @@ async function logTime(taskId, duration, userId){
     }
 
     const userHourlyRate = user.hourlyRate || 0;
-    const sessionCost = Math.round((userHourlyRate / 60) * duration * 100) / 100;
+    const sessionCost = Math.round((userHourlyRate / 3600) * duration * 100) / 100;
 
-    const isBurnedOut = duration > 90;
+    const isBurnedOut = duration > 5400;
 
     const newLog = {
         user: userId,
@@ -164,6 +167,7 @@ async function logTime(taskId, duration, userId){
     task.cost = task.timeLogs.reduce((sum, log) => sum + (log.cost || 0), 0);
 
     await task.save();
+    await task.populate('assignedTodo');
     return task;
 }
 

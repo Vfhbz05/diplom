@@ -40,9 +40,9 @@ const taskSchema = new mongoose.Schema({
         enum: ['Todo', 'InProgress', 'Review', 'Done', 'InRevision'],
         default: 'Todo'
     },
-    estimatedTime: {
-        type: Number,
-        default: 0
+    dueDate: {
+        type: Date,
+        default: null
     },
     totalDuration: {
         type: Number,

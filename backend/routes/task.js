@@ -20,8 +20,8 @@ const router = express.Router();
 
 router.post('/', isAuth, async (req, res) => {
     try{
-        const { title, description, estimatedTime, projectId, assignedTodo } = req.body;
-        const task = await createTask(title, description, estimatedTime, projectId, assignedTodo, req.user._id);
+        const { title, description, dueDate, projectId, assignedTodo } = req.body;
+        const task = await createTask(title, description, dueDate, projectId, assignedTodo, req.user._id);
 
         await updateProjectProgress(projectId);
 
@@ -120,13 +120,13 @@ router.patch('/:id/status', isAuth, async (req, res) => {
     }
 });
 
-router.post('/:id/time', isAuth, async (req, res) => {
+router.patch('/:id/time', isAuth, async (req, res) => {
     try{
         const taskId = req.params.id;
-        const { duration } = req.body;
+        const { minutes } = req.body;
         const userId = req.user._id;
 
-        const updatedTask = await logTime(taskId, duration, userId);
+        const updatedTask = await logTime(taskId, minutes, userId);
         res.send({ error: null, task: updatedTask });
     } catch(err){
         res.status(400).send({ error: err.message });

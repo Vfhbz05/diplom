@@ -5,3 +5,5 @@ export * from "./header/Logo";
 export * from "./header/UserControlPanel";
 export * from "./project/CreateProjectForm";
 export * from "./project/ProjectList";
+export * from './task/KanbanBoard';
+export * from './task/TeamPanel';

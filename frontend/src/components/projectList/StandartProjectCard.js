@@ -13,7 +13,7 @@ export const StandartProjectCard = ({ project}) => {
 
     const progressPercent = project.progress || 0;
     return(
-        <StyledCardLink to = {`/project/${project._id}`} className = 'project-card'>
+        <StyledCardLink to = {`/${project._id}/tasks`} className = 'project-card'>
             <div className="card-top">
                 <h2>{project.name}</h2>
                 <span>👤  {ownerDisplay}</span>
