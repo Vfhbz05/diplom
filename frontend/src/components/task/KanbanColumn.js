@@ -46,13 +46,7 @@ export const KanbanColumn = ({ col, onSelectTask, filterStartDate, filterEndDate
             {col.title} 
             <span className="task-count-badge">{colTasks.length}</span>
           </h3>
-          
-          <div className="tasks-scroll-list">
-            {colTasks.map((task) => (
-              <TaskCard key={task._id || task.id} task={task} onOpenModal={() => onSelectTask(task)} />
-            ))}
-          </div>
-          
+
           {isFormActive ? (
             <TaskForm setActiveFormCol={setIsFormActive} colId={col.id} />
           ) : (
@@ -62,6 +56,24 @@ export const KanbanColumn = ({ col, onSelectTask, filterStartDate, filterEndDate
               </button>
             )
           )}
+          <div className="tasks-scroll-list">
+            {colTasks
+              .slice()
+              .sort((a,b) => {
+                if (a.dueDate && b.dueDate) {
+                  return new Date(a.dueDate) - new Date(b.dueDate);
+                }
+
+                if (a.dueDate) return -1;
+                if (b.dueDate) return 1;
+                return 0;
+              })
+              .map((task) => (
+              <TaskCard key={task._id || task.id} task={task} onOpenModal={() => onSelectTask(task)} />
+            ))}
+          </div>
+          
+          
         </ColumnWrapper>
   );
 };
@@ -139,10 +151,11 @@ const ColumnWrapper = styled.div`
     text-align: center;
     font-size: 12px;
     font-weight: 600;
-    padding: 8px;
+    padding: 10px;
     cursor: pointer;
     font-family: inherit;
     transition: all 0.15s ease-in-out;
+    margin-bottom: 4px;
     &:hover {
       background: #ffffff;
       color: #0f172a;

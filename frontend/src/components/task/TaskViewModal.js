@@ -77,6 +77,12 @@ export const TaskViewModal = ({ task,  onClose, onTimeUpdated }) => {
 
                 <div className="modal-grid-info">
                   <div className="info-cell">
+                    <span className="cell-label">✍️ Создатель задачи</span>
+                    <span className="cell-value creator">
+                      {task?.createdBy?.name || task?.createdBy?.email || "Система"}
+                    </span>
+                  </div>
+                  <div className="info-cell">
                     <span className="cell-label">📅 Срок сдачи</span>
                     <span className="cell-value estimate" style={{ color: task.dueDate ? '#b91c1c' : '#64748b' }}>
                       {task.dueDate ? formatDeadline(task.dueDate) : "Не установлен"}
@@ -254,6 +260,10 @@ const ModalBody = styled.div`
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 12px;
+  }
+
+  .cell-value.creator {
+    color: #475569;
   }
 
   .info-cell {

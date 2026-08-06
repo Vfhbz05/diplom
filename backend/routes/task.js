@@ -69,8 +69,9 @@ router.patch('/:id', isAuth, async (req,res) => {
 
         const isProjectOwner = task.project.owner.toString() === req.user._id.toString();
         const isManagement = [ROLE.ADMIN].includes(req.user.role);
+        const isCreator = task.createdBy && task.createdBy.toString() === req.user._id.toString();
 
-        if(!isProjectOwner && !isManagement){
+        if(!isProjectOwner && !isManagement && !isCreator){
             return res.status(403).send({ error: 'У вас нет прав на редактирование этой задачи' });
         }
 

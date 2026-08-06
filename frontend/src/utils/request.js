@@ -19,7 +19,12 @@ export async function request (url, method = 'GET', data = null){
     const response = await fetch(`${BASE_URL}${url}`, options);
 
     if(!response.ok){
-        return { error: `Ошибка сервера`};
+        try {
+            const errorData = await response.json();
+            return { error: errorData.error || `Ошибка сервера (${response.status})` };
+        } catch {
+            return { error: `Ошибка сервера: ${response.statusText}` };
+        }
     }
 
     try{

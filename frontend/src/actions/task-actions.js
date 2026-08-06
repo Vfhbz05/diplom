@@ -105,7 +105,6 @@ export const changeTaskStatus = (taskId, newStatus, projectId) => (dispatch, get
 export const addTeamMember = (projectId, email) => (dispatch) => {
     return request(`/projects/${projectId}/members`, 'PATCH', { email }).then((data) => {
         if(data.error) {
-            alert(`Ошибка добавления в команду: ${data.error}`);
             return data;
         }
         dispatch(updateProjectInList(data.project));

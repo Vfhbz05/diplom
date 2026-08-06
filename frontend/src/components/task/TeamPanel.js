@@ -19,6 +19,7 @@ export const TeamPanel = () => {
 
     const [newMemberEmail, setNewMemberEmail] = useState('');
     const [isAddingMember, setIsAddingMember] = useState(false);
+    const [memberError, setMemberError] = useState('');
 
     const isOwnerOrAdmin = currentProject?.owner?._id === currentUser?._id ||
         currentProject?.owner === currentUser?._id ||
@@ -27,11 +28,16 @@ export const TeamPanel = () => {
     const handleAddMemberSubmit = (e) => {
          e.preventDefault();
         if(!newMemberEmail.trim()) return;
-    
+        
+        setMemberError('');
+
         dispatch(addTeamMember(projectId, newMemberEmail)).then((res) => {
-            if(!res?.error){
-                setNewMemberEmail('');
-                setIsAddingMember(false);
+            if(res && res?.error){
+                setMemberError(res.error);
+            } else {
+              setNewMemberEmail('');
+              setIsAddingMember(false);
+              setMemberError('');
             }
         });
     };
@@ -68,45 +74,66 @@ export const TeamPanel = () => {
                 </div>
 
             
-            {projectTeam.map(member => {
-                const memberId = member._id || member;
-                const memberName = member.name || 'Разработчик';
-                const memberEmail = member.email || '';
+                {projectTeam.map(member => {
+                    const memberId = member._id || member;
+                    const memberName = member.name || 'Разработчик';
+                    const memberEmail = member.email || '';
 
-                if (memberId === currentProject?.owner?._id || memberId === currentProject?.owner) return null;
+                    if (memberId === currentProject?.owner?._id || memberId === currentProject?.owner) return null;
 
-                return (
-                <div className="member-badge" key={memberId}>
-                    <div className="avatar-icon" style={{ backgroundColor: '#475569' }}>
-                    {memberName.substring(0, 2).toUpperCase()}
+                    return (
+                    <div className="member-badge" key={memberId}>
+                        <div className="avatar-icon" style={{ backgroundColor: '#475569' }}>
+                        {memberName.substring(0, 2).toUpperCase()}
+                        </div>
+                        <div className="member-text-details">
+                        <span className="member-name-text">{memberName}</span>
+                        <span className="member-email-text">{memberEmail}</span>
+                        </div>
+                        {isOwnerOrAdmin && (
+                        <button className="kick-member-btn" onClick={() => handleRemoveMemberClick(memberId, memberName)}>×</button>
+                        )}
                     </div>
-                    <div className="member-text-details">
-                    <span className="member-name-text">{memberName}</span>
-                    <span className="member-email-text">{memberEmail}</span>
-                    </div>
-                    {isOwnerOrAdmin && (
-                    <button className="kick-member-btn" onClick={() => handleRemoveMemberClick(memberId, memberName)}>×</button>
-                    )}
+                    );
+                })}
                 </div>
-                );
-            })}
-            </div>
 
-            {isAddingMember && (
-            <form className="inline-member-form" onSubmit={handleAddMemberSubmit}>
-                <input 
-                className="member-email-input"
-                type="email" 
-                placeholder="Введите email пользователя на платформе..." 
-                value={newMemberEmail} 
-                onChange={e => setNewMemberEmail(e.target.value)} 
-                required 
-                />
-                <button className="member-submit-btn" type="submit">Добавить</button>
-                <button className="member-cancel-btn" type="button" onClick={() => setIsAddingMember(false)}>Отмена</button>
-            </form>
-            )}
-        </div>
+                {isAddingMember && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxWidth: '550px' }}>
+                    <form className="inline-member-form" onSubmit={handleAddMemberSubmit}>
+                      <input 
+                        className="member-email-input" 
+                        type="email" 
+                        placeholder="Введите email пользователя на платформе..." 
+                        value={newMemberEmail} 
+                        onChange={e => {
+                          setNewMemberEmail(e.target.value);
+                          if(memberError) setMemberError(''); 
+                        }} 
+                        required 
+                      />
+                      <button className="member-submit-btn" type="submit">Добавить</button>
+                      <button className="member-cancel-btn" type="button" onClick={() => {
+                        setIsAddingMember(false);
+                        setMemberError('');
+                      }}>Отмена</button>
+                    </form>
+                  
+                    {memberError && (
+                      <div style={{ 
+                        color: '#dc2626', 
+                        fontSize: '12.5px', 
+                        fontWeight: '500',
+                        paddingLeft: '8px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px'
+                      }}>
+                        ⚠️ {memberError}
+                      </div>
+                    )}
+                  </div>)}
+          </div>
         </TeamPanelContainer>
     );
 };

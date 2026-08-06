@@ -20,10 +20,15 @@ async function createTask(title, description, dueDate, projectId, assignedTodo, 
         dueDate: dueDate || 0,
         project: projectId,
         assignedTodo: assignedTodo || userId,
-        assignedAt: new Date()
+        assignedAt: new Date(),
+        createdBy: userId
     });
 
-    await task.populate('assignedTodo');
+    await task.populate([
+        { path: 'assignedTodo', select: 'name email' },
+        { path: 'createdBy', select: 'name email' }
+    ]);;
+    
     return task;
 }
 
@@ -39,6 +44,7 @@ async function getProjectTasks(projectId, userId){
 
     return await Task.find({ project: projectId })
         .populate('assignedTodo', 'name email')
+        .populate('createdBy', 'name email')
         .populate('timeLogs.user', 'name email');
 }
 
