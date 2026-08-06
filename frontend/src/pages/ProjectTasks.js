@@ -42,6 +42,11 @@ export const ProjectTasks = () => {
                 </div>
             </div>
             <TeamPanel />
+            <TabNavigationBar>
+                <NavLinkTab to={`/${projectId}/analytics`}>
+                  📊 Аналитика проекта
+                </NavLinkTab>
+            </TabNavigationBar>
             <KanbanBoard />
         </BoardContainer>
   );
@@ -116,5 +121,34 @@ const CenteredStyle = styled.div`
     font-weight: 500;
     background-color: #f8fafc;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+`;
+
+const TabNavigationBar = styled.div`
+  display: flex;
+  gap: 8px;
+  margin: 16px 16px 20px 16px;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 8px;
+`;
+
+const NavLinkTab = styled(Link)`
+  text-decoration: none;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #64748b;
+  border-radius: 6px;
+  font-family: inherit;
+  transition: all 0.15s ease;
+
+  &:hover {
+    color: #0f172a;
+    background: #f1f5f9;
+  }
+
+  &.active {
+    color: #2563eb;
+    background: #eff6ff;
   }
 `;
