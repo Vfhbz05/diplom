@@ -35,6 +35,7 @@ export const createTaskAction = (taskData) => (dispatch) => {
     });
 };
 export const deleteTaskAction = (taskId) => (dispatch) => {
+	
     return request(`/tasks/${taskId}`, 'DELETE').then((data) => {
         if(data.error) {
             alert(`Ошибка удаления задачи: ${data.error}`);

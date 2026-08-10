@@ -12,32 +12,43 @@ export const TaskCard = ({task, onOpenModal}) => {
     const targetTaskId = task._id || task.id;
 
     const currentUser = useSelector(selectCurrentUser);
-    const currentProject = useSelector(selectProjectById(task.project));
+    const currentProjectId = task.project?._id || task.project;
+    const currentProject = useSelector(selectProjectById(currentProjectId));
 
+    
     const projectOwnerId = currentProject?.owner?._id || currentProject?.owner;
     const isProjectOwner = projectOwnerId && currentUser?._id 
       ? String(projectOwnerId) === String(currentUser._id) 
       : false;
 
-    const executorId = task.assignedTodo?._id || task.assignedTodo;
+    const executorId = task.assignedTodo?._id || (typeof task.assignedTodo === "string" ? task.assignedTodo : null);
     const isExecutor = executorId && currentUser?._id 
       ? String(executorId) === String(currentUser._id) 
       : false;
     const isManagement = [ROLE.ADMIN].includes(currentUser?.role) || isProjectOwner;
     
-    const isDeadlineTomorrow = (dateString) => {
-      if (!dateString) return false;
-      
+    const getDeadlineStatus = (dateString) => {
+      if (!dateString) return "normal";
+
       const taskDate = new Date(dateString);
+      taskDate.setHours(0, 0, 0, 0);
+
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
       const tomorrow = new Date();
       tomorrow.setDate(tomorrow.getDate() + 1);
+      tomorrow.setHours(0, 0, 0, 0);
 
-      return (
-        taskDate.getFullYear() === tomorrow.getFullYear() &&
-        taskDate.getMonth() === tomorrow.getMonth() &&
-        taskDate.getDate() === tomorrow.getDate()
-      );
+      if (taskDate <= today) return "overdue";
+      
+      if (taskDate.getTime() === tomorrow.getTime()) return "tomorrow";
+
+      return "normal";
     };
+
+    const deadlineStatus = getDeadlineStatus(task.dueDate);
+
     const handleDeleteClick = (e) => {
         e.stopPropagation(); 
         if (window.confirm("Внимание! Задача будет удалена безвозвратно. Продолжить?")) {
@@ -45,71 +56,68 @@ export const TaskCard = ({task, onOpenModal}) => {
         }
     };
 
-    const taskHandlerName = task.assignedTodo?.name || task.assignedTodo?.email || "Не назначен";
-
+    let taskHandlerName = "Не назначен";
+    if (task.assignedTodo) {
+      if (typeof task.assignedTodo === "object") {
+        taskHandlerName = task.assignedTodo.name || task.assignedTodo.email || "Не назначен";
+      } else if (typeof task.assignedTodo === "string") {
+        taskHandlerName = String(task.assignedTodo) === String(currentUser?._id) 
+          ? `${currentUser.name || currentUser.email} (Вы)` 
+          : "Сотрудник назначен";
+      }
+    }
+    const cardClass = deadlineStatus === "overdue" 
+      ? "deadline-overdue" 
+      : deadlineStatus === "tomorrow" 
+        ? "deadline-tomorrow" 
+        : "";
     return(
-        <CardWrapper className={isDeadlineTomorrow(task.dueDate) ? "deadline-tomorrow" : ""} onClick={onOpenModal}>
+        <CardWrapper className={cardClass} onClick={onOpenModal}>
           <div className="task-card-top-row">
             <p className="task-title-heading">{task.title}</p>
             {isManagement && (
-              <button className="delete-task-btn" onClick={handleDeleteClick}>
-                ×
-              </button>
+              <button className="delete-task-btn" onClick={handleDeleteClick}> × </button>
             )}
           </div>
-
+          
           <div className="task-deadline-row">
             {task.dueDate ? (
-              <span className="compact-tag date-tag">
-                📅 {formatDeadline(task.dueDate)}
-              </span>
+              <span className="compact-tag date-tag"> 📅 {formatDeadline(task.dueDate)} </span>
             ) : (
               <span className="compact-tag no-date-tag">📅 Без срока</span>
             )}
           </div>
+          
           <div className="task-executor-row">
-            <span className="handler-name-badge" title="Ответственный">
-              👤 {taskHandlerName}
-            </span>
+            <span className="handler-name-badge" title="Ответственный"> 👤 {taskHandlerName} </span>
           </div>
           
-
           <div className="task-card-actions-area" onClick={(e) => e.stopPropagation()}>
             {task.status === STATUS.TODO && isExecutor && (
-              <button
-                className="move-state-btn"
-                onClick={() => dispatch(changeTaskStatus(targetTaskId, STATUS.IN_PROGRESS, task.project))}
-              >
+              <button className="move-state-btn" onClick={() => dispatch(changeTaskStatus(targetTaskId, STATUS.IN_PROGRESS, currentProjectId))} >
                 В работу →
               </button>
             )}
+            
             {(task.status === STATUS.IN_PROGRESS || task.status === STATUS.IN_REVISION) && isExecutor && (
-              <button
-                className="move-state-btn"
-                onClick={() => dispatch(changeTaskStatus(targetTaskId, STATUS.REVIEW, task.project))}
-              >
+              <button className="move-state-btn" onClick={() => dispatch(changeTaskStatus(targetTaskId, STATUS.REVIEW, currentProjectId))} >
                 На проверку →
               </button>
             )}
+            
             {task.status === STATUS.REVIEW && isManagement && (
               <div className="management-control-group">
-                <button
-                  className="reject-state-btn"
-                  onClick={() => dispatch(changeTaskStatus(targetTaskId, STATUS.IN_REVISION, task.project))}
-                >
+                <button className="reject-state-btn" onClick={() => dispatch(changeTaskStatus(targetTaskId, STATUS.IN_REVISION, currentProjectId))} >
                   ↩ Доработать
                 </button>
-                <button
-                  className="accept-state-btn"
-                  onClick={() => dispatch(changeTaskStatus(targetTaskId, STATUS.DONE, task.project))}
-                >
+                <button className="accept-state-btn" onClick={() => dispatch(changeTaskStatus(targetTaskId, STATUS.DONE, currentProjectId))} >
                   Принять ✓
                 </button>
               </div>
             )}
           </div>
         </CardWrapper>
-  );
+	);
 };
 
 TaskCard.propTypes = {
@@ -128,34 +136,44 @@ TaskCard.propTypes = {
 
 const CardWrapper = styled.div`
   background: #ffffff;
-  border-radius: 10px;
-  padding: 12px;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 2px 4px rgba(15, 23, 42, 0.01);
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  cursor: pointer;
-  transition: all 0.15s ease-in-out;
-  box-sizing: border-box;
+	border-radius: 10px;
+	padding: 12px;
+	border: 1px solid #e2e8f0;
+	box-shadow: 0 2px 4px rgba(15, 23, 42, 0.01);
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	cursor: pointer;
+	transition: all 0.15s ease-in-out;
+	box-sizing: border-box;
 
-  &:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 6px 10px rgba(15, 23, 42, 0.05);
-    border-color: #cbd5e1;
-  }
+	&:hover {
+		transform: translateY(-1px);
+		box-shadow: 0 6px 10px rgba(15, 23, 42, 0.05);
+		border-color: #cbd5e1;
+	}
 
-  &.deadline-tomorrow {
-    background: #fff5f5;
-    border-color: #fca5a5;
-    box-shadow: 0 2px 6px rgba(239, 68, 68, 0.03);
-    
-    .date-tag {
-      background: #dc2626;
-      color: #ffffff;
-      border-color: #dc2626;
-    }
-  }
+	&.deadline-overdue {
+		background: #fef2f2;
+		border-color: #fca5a5;
+		box-shadow: 0 2px 6px rgba(239, 68, 68, 0.03);
+		.date-tag {
+			background: #dc2626;
+			color: #ffffff;
+			border-color: #dc2626;
+		}
+	}
+
+	&.deadline-tomorrow {
+		background: #fff7ed;
+		border-color: #fed7aa;
+		box-shadow: 0 2px 6px rgba(249, 115, 22, 0.03);
+		.date-tag {
+			background: #f97316;
+			color: #ffffff;
+			border-color: #f97316;
+		}
+	}
 
   .task-card-top-row {
     display: flex;

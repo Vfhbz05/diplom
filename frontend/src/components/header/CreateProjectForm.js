@@ -5,7 +5,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useState } from "react";
 import styled from "styled-components";
-import { createNewProject,closeCreateModal } from "../../actions";
+import { createNewProject, closeCreateModal } from "../../actions";
 
 const projectFormSchema = yup.object().shape({
     name: yup
@@ -24,7 +24,6 @@ const projectFormSchema = yup.object().shape({
 export const CreateProjectForm = () => {
     const [serverError, setServerError] = useState(null); 
     const dispatch = useDispatch();
-    const isOpen = useSelector((state) => state.projects.isCreateModalOpen);
 
     const {
         register,
@@ -40,7 +39,6 @@ export const CreateProjectForm = () => {
             resolver: yupResolver(projectFormSchema),
         });
 
-    if (!isOpen) return null;
 
     const onSubmit = ({ name, description, deadline }) => {
             dispatch(createNewProject({ name, description, deadline }))
@@ -50,6 +48,8 @@ export const CreateProjectForm = () => {
                         return;
                     }
                     reset();
+                    setServerError(null);
+                    dispatch(closeCreateModal());
                 }).catch((err)=> setServerError(`Ошибка при создании: ${err.message}`));
         }; 
 

@@ -1,2 +1,2 @@
-export * from "./CreateProjectForm";
+export * from "../header/CreateProjectForm";
 export * from "./ProjectList";

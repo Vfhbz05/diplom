@@ -12,8 +12,10 @@ export const StandartProjectCard = ({ project}) => {
             : 'Вы';
 
     const progressPercent = project.progress || 0;
+
+    const isOverdue = project.deadline ? new Date(project.deadline) < new Date() : false;
     return(
-        <StyledCardLink to = {`/${project._id}/tasks`} className = 'project-card'>
+        <StyledCardLink to = {`/${project._id}/tasks`} className = 'project-card' $isOverdue={isOverdue}>
             <div className="card-top">
                 <h2>{project.name}</h2>
                 <span>👤  {ownerDisplay}</span>
@@ -41,10 +43,14 @@ export const StandartProjectCard = ({ project}) => {
 };
 
 StandartProjectCard.propTypes = {
-  project: PropTypes.object.isRequired,
-  ownerDisplay: PropTypes.string.isRequired,
-  formattedDeadline: PropTypes.string.isRequired,
-  progressPercent: PropTypes.number.isRequired,
+  project: PropTypes.shape({
+    _id: PropTypes.string.isRequired,
+    name: PropTypes.string.isRequired,
+    description: PropTypes.string,
+    deadline: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
+    owner: PropTypes.oneOfType([PropTypes.object, PropTypes.string]),
+    progress: PropTypes.number,
+  }).isRequired,
 };
 
 const StyledCardLink = styled(Link)`
@@ -54,6 +60,11 @@ const StyledCardLink = styled(Link)`
   display: flex;
   flex-direction: column;
   flex: 1;
+
+  border: 1px solid ${props => props.$isOverdue ? 'rgba(239, 68, 68, 0.4)' : 'transparent'};
+  border-radius: 8px;
+  background: ${props => props.$isOverdue ? 'rgba(239, 68, 68, 0.01)' : 'transparent'};
+  transition: all 0.2s ease;
 
   & .card-top {
     display: flex;
@@ -110,8 +121,9 @@ const StyledCardLink = styled(Link)`
     & span { 
       color: #868e96; 
     }
+
     & strong { 
-      color: #007bff; 
+      color: ${props => props.$isOverdue ? '#ef4444' : '#007bff'}; 
       margin-top: 3px; 
       font-weight: 600; 
     }

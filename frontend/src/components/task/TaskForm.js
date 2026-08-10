@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import styled from "styled-components";
 import PropTypes from "prop-types";
+import { getTodayString } from "../../utils/getTodayString";
 import { createTaskAction, updateTaskFieldAction } from "../../actions";
 import { selectProjectById, selectProjectTeam } from "../../selectors";
 
@@ -22,7 +23,7 @@ export const TaskForm = ({setActiveFormCol, colId, task = null}) => {
 
     const [newTaskTitle, setNewTaskTitle] = useState('');
     const [newTaskDesc, setNewTaskDesc] = useState('');
-    const [newTaskDueDate, setNewTaskDueDate] = useState(taskId ? formatDateForInput(task.dueDate) : "");
+    const [newTaskDueDate, setNewTaskDueDate] = useState(taskId ? formatDateForInput(task.dueDate) : '');
     const [newTaskExecutor, setNewTaskExecutor] = useState(
       taskId ? (task.assignedTodo?._id || task.assignedTodo || '') : ''
     );
@@ -41,10 +42,12 @@ export const TaskForm = ({setActiveFormCol, colId, task = null}) => {
 
         if (!newTaskTitle.trim()) return;
 
+        const finalDueDate = newTaskDueDate ? newTaskDueDate : getTodayString();
+
         const taskData = {
           title: newTaskTitle,
           description: newTaskDesc,
-          dueDate: newTaskDueDate || null, 
+          dueDate: finalDueDate, 
           assignedTodo: newTaskExecutor || null,
         };
         

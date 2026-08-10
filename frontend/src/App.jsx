@@ -1,18 +1,15 @@
-import { Routes, Route, useLocation } from 'react-router-dom';
-//Navigate
-//import { useSelector } from 'react-redux';
-//import { selectCurrentUserId, selectCurrentUser } from './selectors';
+import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
+import { selectCurrentUserId, selectCurrentUser } from './selectors';
 import { Login, Page404, Projects, Register, ProjectTasks, Analytics, AdminPanel, Settings } from './pages';
 import { Header } from './components';
 import { useSelector } from 'react-redux';
-import { selectCurrentUserId } from './selectors';
+import { ROLE } from './constants/role';
 
 function App() {
 
   const location = useLocation();
   const userId = useSelector(selectCurrentUserId);
-
-  //const user = useSelector(selectCurrentUser);
+  const user = useSelector(selectCurrentUser);
 
   const showHeader = location.pathname !== "/login" && location.pathname !== "/register";
 
@@ -20,14 +17,14 @@ function App() {
     <>
       {userId && showHeader && <Header />}
       <Routes>
-        <Route path = '/register' element = {< Register/>}/* {!userId ? <Register /> : < Navigate to = '/'/>}*//>
-        <Route path = '/login' element = {<Login />}/*{!userId ? <Login /> : < Navigate to = '/'/>} *//>
+        <Route path = '/register' element = {!userId ? <Register /> : < Navigate to = '/' replace/>}/>
+        <Route path = '/login' element = {!userId ? <Login /> : < Navigate to = '/' replace/>} />
 
-        <Route path = '/' element = {<Projects />} /* {userId ? <Projects /> : <Navigate to = '/login'/>} *//>
-        <Route path="/:projectId/tasks" element= {<ProjectTasks />}/*{userId ? <ProjectTasks /> : <Navigate to="/login" />} */ />
-        <Route path="/:projectId/analytics" element= {<Analytics />}/*{userId ? <Analytics /> : <Navigate to="/login" />}  *//>
-        <Route path="/admin" element= {<AdminPanel />}/*{userId && user.role === 'admin' ? <AdminPanel /> : <Navigate to="/"/>} *//>
-        <Route path="/settings" element= {<Settings />}/*{userId ? <Settings /> : <Navigate to="/login" />}*/ />
+        <Route path = '/' element = {userId ? <Projects /> : <Navigate to = '/login' replace  />}/>
+        <Route path="/:projectId/tasks" element= {userId ? <ProjectTasks /> : <Navigate to="/login" replace/>} />
+        <Route path="/:projectId/analytics" element= {userId ? <Analytics /> : <Navigate to="/login" replace/>} />
+        <Route path="/settings" element= {userId ? <Settings /> : <Navigate to="/login" replace />} />
+        <Route path="/admin" element= {userId && user.role === ROLE.ADMIN ? <AdminPanel /> : <Navigate to="/" replace />} />
         <Route path="*" element={<Page404 />} />
       </Routes>
     </>

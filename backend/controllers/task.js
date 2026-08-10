@@ -61,7 +61,9 @@ async function updateTask(taskId, updateData){
     delete updateData.timeLogs;
     delete updateData.totalDuration;
 
-    const task = await Task.findByIdAndUpdate(taskId, updateData, {new: true, runValidators: true}).populate('assignedTodo');
+    const task = await Task.findByIdAndUpdate(taskId, updateData, {new: true, runValidators: true})
+        .populate('assignedTodo')
+        .populate('createdBy', 'name email'); 
     if(!task){
         throw new Error('Задача не найдена');
     }
@@ -82,12 +84,19 @@ async function updateExecutor(taskId, newExecutorId){
     }
 
     await task.save();
-    await task.populate('assignedTodo');
+    await task.populate([
+        { path: 'assignedTodo', select: 'name email' },
+        { path: 'createdBy', select: 'name email' }
+    ]);
     return task;
 }
 
 async function updateTaskStatus(taskId, newStatus, user){
-    const task = await Task.findById(taskId).populate('project').populate('assignedTodo');
+    const task = await Task.findById(taskId)
+        .populate('project')
+        .populate('assignedTodo')
+        .populate('createdBy', 'name email');
+
     if(!task){
         throw new Error('Задача не найдена');
     }
@@ -127,6 +136,10 @@ async function updateTaskStatus(taskId, newStatus, user){
     
     task.status = newStatus;
     await task.save();
+    await task.populate([
+        { path: 'assignedTodo', select: 'name email' },
+        { path: 'createdBy', select: 'name email' }
+    ]);
     return task;
 }
 
@@ -173,7 +186,10 @@ async function logTime(taskId, duration, userId){
     task.cost = task.timeLogs.reduce((sum, log) => sum + (log.cost || 0), 0);
 
     await task.save();
-    await task.populate('assignedTodo');
+    await task.populate([
+        { path: 'assignedTodo', select: 'name email' },
+        { path: 'createdBy', select: 'name email' }
+    ]);
     return task;
 }
 

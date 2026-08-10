@@ -1,69 +1,17 @@
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { logoutUser } from "../../actions";
 import { selectCurrentUserName } from "../../selectors";
-import { openCreateModal } from "../../actions/project-actions";
-
-
-const PanelWrapper = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 20px;
-
-  & .create-project-btn {
-    background-color: var(--accent);
-    border: none;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 14px;
-    cursor: pointer;
-    box-shadow: var(--shadow);
-    transition: transform 0.2s, background-color 0.2s;
-
-    &:hover {
-      transform: scale(1.1);
-      opacity: 0.9;
-    }
-  }
-
-  & .user-name {
-    font-size: 15px;
-    color: var(--text);
-    
-    & strong {
-      color: var(--text-h);
-    }
-  }
-
-  & .logout-button {
-    background: none;
-    border: 1px solid var(--border);
-    padding: 8px 16px;
-    border-radius: 6px;
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--text-h);
-    cursor: pointer;
-    transition: all 0.2s;
-
-    &:hover {
-      background-color: rgba(239, 68, 68, 0.1);
-      border-color: rgba(239, 68, 68, 0.4);
-      color: #ef4444;
-    }
-  }
-`;
+import { openCreateModal } from "../../actions";
+import { CreateProjectForm } from "./CreateProjectForm"; 
 
 
 export const UserControlPanel = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const userName = useSelector(selectCurrentUserName) || "Пользователь";
+     const isCreateModalOpen = useSelector((state) => state.projects?.isCreateModalOpen);
 
     const handleLogout = () => {
         sessionStorage.removeItem("userData");
@@ -77,11 +25,14 @@ export const UserControlPanel = () => {
           <span className="plus-icon">＋</span> 
           <span className="button-text">Создать проект</span>
         </ExpandableCreateButton>
-      <span className="user-name">Привет, <strong>{userName}</strong>!</span>
+      <StyledProfileLink to="/settings" title="Перейти в настройки профиля">Привет, <strong>{userName}</strong>!</StyledProfileLink>
       
       <button className="logout-button" onClick={handleLogout}>
         Выйти 🚪
       </button>
+
+      {isCreateModalOpen && <CreateProjectForm />}
+
     </PanelWrapper>
   );
 }
@@ -134,5 +85,71 @@ const ExpandableCreateButton = styled.button`
 
   &:active {
     transform: scale(0.96);
+  }
+`;
+
+const PanelWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 20px;
+
+  & .create-project-btn {
+    background-color: var(--accent);
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    transition: transform 0.2s, background-color 0.2s;
+
+    &:hover {
+      transform: scale(1.1);
+      opacity: 0.9;
+    }
+  }
+
+  & .logout-button {
+    background: none;
+    border: 1px solid var(--border);
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-h);
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &:hover {
+      background-color: rgba(239, 68, 68, 0.1);
+      border-color: rgba(239, 68, 68, 0.4);
+      color: #ef4444;
+    }
+  }
+`;
+
+const StyledProfileLink = styled(Link)`
+  font-size: 15px;
+  color: var(--text, #495057);
+  text-decoration: none; 
+  transition: all 0.2s ease;
+  cursor: pointer;
+
+  & strong {
+    color: var(--text-h, #1d3557);
+    transition: color 0.2s ease;
+  }
+
+  &:hover {
+    color: #007bff; 
+    
+    & strong {
+      color: #0056b3; 
+      text-decoration: underline; 
+    }
   }
 `;

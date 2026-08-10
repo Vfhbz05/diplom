@@ -170,7 +170,7 @@ export const ProjectAnalytics = () => {
 					) : (
 						<div className="no-data-placeholder">
 							<span className="icon">📊</span>
-							<p>Разработчики еще не залогировали время в задачи</p>
+							<p>Сотрудники еще не залогировали время в задачи</p>
 						</div>
 					)}
 				</ChartBlock>

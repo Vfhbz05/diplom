@@ -1,6 +1,5 @@
 import styled from "styled-components";
 import { Logo } from "./Logo";
-import { NotificationBell } from "./NotificationBell";
 import { UserControlPanel } from "./UserControlPanel";
 
 export const Header = () => {
@@ -8,8 +7,6 @@ export const Header = () => {
     <HeaderContainer>
       <Logo/>
       <div className="right-side-controls">
-        
-        <NotificationBell />
         <UserControlPanel />
       </div>
     </HeaderContainer>

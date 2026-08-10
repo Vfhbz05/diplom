@@ -27,7 +27,13 @@ export function userReducer(state = initialState, { type, payload}){
         case ACTION_TYPES.USER_LOGOUT: 
             return {
                 ...state,
-                user: initialState.user,
+                user: {
+                    _id: null,
+                    email: null,
+                    role: null,
+                    name: null,
+                    hourlyRate: 0,
+                },
                 loading: false,
                 error: null
             }

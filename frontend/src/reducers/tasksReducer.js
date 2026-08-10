@@ -39,7 +39,12 @@ export function tasksReducer(state = initialState, {type, payload}){
         case ACTION_TYPES.DELETE_TASK: 
             return{
                 ...state,
-                items: state.items.filter((task) => task._id !== payload)
+                items: state.items.filter((task) => {
+                    const taskIdInState = String(task._id || task.id || '');
+                    const deletedTaskId = String(payload || '');
+
+                    return taskIdInState !== deletedTaskId
+                })
             };
         case ACTION_TYPES.FETCH_TASKS_FAILURE:
             return {
