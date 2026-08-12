@@ -101,6 +101,24 @@ async function updateOwnPassword(userId, oldPassword, newPassword){
     return true;
 }
 
+async function updateOwnProfile (userId, name) {
+    if(!name || name.trim().length < 2){
+        throw new Error('Имя должно содержать не менее 2-х символов');
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+        userId,
+        {name: name.trim()},
+        {new: true, runValidators: true}
+    ).select('-password');
+
+    if(!updatedUser){
+        throw new Error('Пользователь не найден');
+    }
+
+    return updatedUser;
+}
+
 
 module.exports = {
     register, 
@@ -108,5 +126,6 @@ module.exports = {
     updateUserByAdmin, 
     deleteUserByAdmin,
     getAllUsers,
-    updateOwnPassword
+    updateOwnPassword,
+    updateOwnProfile
 };

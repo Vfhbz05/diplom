@@ -61,12 +61,15 @@ async function updateTask(taskId, updateData){
     delete updateData.timeLogs;
     delete updateData.totalDuration;
 
-    const task = await Task.findByIdAndUpdate(taskId, updateData, {new: true, runValidators: true})
-        .populate('assignedTodo')
-        .populate('createdBy', 'name email'); 
+    const task = await Task.findByIdAndUpdate(taskId, updateData, {new: true, runValidators: true});
     if(!task){
         throw new Error('Задача не найдена');
     }
+
+    await task.populate([
+        { path: 'assignedTodo', select: 'name email' },
+        { path: 'createdBy', select: 'name email' }
+    ]);
     return task;
 }
 

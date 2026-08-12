@@ -26,21 +26,19 @@ const InputGroupContainer = ({ className, label, id, type, register, value, onCh
               <textarea
                 id={id}
                 rows = '3'
-                value={value} 
-                onChange={onChange}
-                {...register}
-                {...props}
                 {...registerProps}
+                {...props}
+                value={value}
+                onChange={onChange} 
               />
             ) : (
               <input 
                 id={id} 
                 type = {currentType}
+                {...registerProps}
+                {...props} 
                 value={value} 
                 onChange={onChange}
-                {...register}
-                {...props} 
-                {...registerProps}
               />
             )}
 
@@ -74,7 +72,7 @@ export const InputGroup = styled(InputGroupContainer)`
   }
 
   & .input-container {
-    position: relative; /* Делаем этот блок точкой отсчета для абсолютной позиции глазка */
+    position: relative; 
     display: flex;
     align-items: center;
     width: 100%;
@@ -107,11 +105,11 @@ export const InputGroup = styled(InputGroupContainer)`
     border-radius: 8px;
     outline: none;
     font-size: 15px;
-    font-family: inherit; /* Чтобы шрифт не менялся на стандартный моноширинный */
+    font-family: inherit; 
     background-color: var(--bg);
     color: var(--text-h);
     box-sizing: border-box;
-    resize: vertical; /* Разрешаем растягивать поле только по вертикали, чтобы не ломать ширину карточки */
+    resize: vertical; 
     transition: border-color 0.2s, box-shadow 0.2s;
 
     &:focus {

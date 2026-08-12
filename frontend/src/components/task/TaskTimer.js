@@ -9,6 +9,17 @@ export const TaskTimer = ({ taskId, isExecutor, isInProgress, onTimeLogged }) =>
   const [isTimerActive, setIsTimerActive] = useState(false);
   const [timerSeconds, setTimerSeconds] = useState(0);
   const timerIntervalRef = useRef(null);
+  const dispatch = useDispatch();
+
+  const secondsRef = useRef(0);
+  useEffect(() => {
+    secondsRef.current = timerSeconds;
+  }, [timerSeconds]);
+
+  const saveTimeParamsRef = useRef({ taskId, onTimeLogged, dispatch });
+  useEffect(() => {
+    saveTimeParamsRef.current = { taskId, onTimeLogged, dispatch };
+  }, [taskId, onTimeLogged, dispatch]);
 
   useEffect(() => {
     if (isTimerActive) {
@@ -22,12 +33,20 @@ export const TaskTimer = ({ taskId, isExecutor, isInProgress, onTimeLogged }) =>
         clearInterval(timerIntervalRef.current);
         timerIntervalRef.current = null;
       }
-    };
+
+      if (isTimerActive && secondsRef.current > 0) {
+      const currentSeconds = secondsRef.current;
+      const params = saveTimeParamsRef.current;
+
+      params.dispatch(logTaskTimeAction(params.taskId, currentSeconds));
+      if (params.onTimeLogged) {
+        params.onTimeLogged(currentSeconds);
+      }
+    }
+  };
   }, [isTimerActive]);
 
-   const dispatch = useDispatch();
-
-   if (!isExecutor || !isInProgress) return null;
+  if (!isExecutor || !isInProgress) return null;
 
   const startTimer = () => {
     setTimerSeconds(0);
@@ -45,7 +64,7 @@ export const TaskTimer = ({ taskId, isExecutor, isInProgress, onTimeLogged }) =>
     dispatch(logTaskTimeAction(taskId, secondsLogged)).then((res) => {
       if (!res?.error) {
         if (onTimeLogged) onTimeLogged(secondsLogged);
-        alert(`Успешно сохранено: зафиксировано ${secondsLogged} сек.`);
+        console.log(`Успешно сохранено: зафиксировано ${secondsLogged} сек.`);
       }
     });
 

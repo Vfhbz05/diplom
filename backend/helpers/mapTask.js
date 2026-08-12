@@ -21,6 +21,7 @@ module.exports = function mapTask(task){
         project: task.project,
         assignedTodo: task.assignedTodo,
         assignedAt: task.assignedAt,
+        createdBy: task.createdBy, 
         timeLogs: task.timeLogs,
         createdAt: task.createdAt,
         isOvertime,

@@ -38,6 +38,7 @@ export const TeamPanel = () => {
               setNewMemberEmail('');
               setIsAddingMember(false);
               setMemberError('');
+              dispatch(fetchProjectById(projectId));
             }
         });
     };

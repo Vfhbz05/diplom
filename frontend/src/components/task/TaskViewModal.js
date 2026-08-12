@@ -1,8 +1,8 @@
 import PropTypes from "prop-types";
 import { TaskTimer } from './TaskTimer';
 import styled from 'styled-components';
-import { useSelector } from 'react-redux';
-import { selectCurrentUser } from '../../selectors';
+import { useDispatch, useSelector } from 'react-redux';
+import { selectCurrentUser, selectTaskById } from '../../selectors';
 import { STATUS } from '../../constants/status';
 import { COLUMNS } from '../../constants/columns';
 import { useState } from "react";
@@ -11,20 +11,25 @@ import { formatTotalLoggedTime } from "../../utils/formatTotalLoggedTime";
 import { formatDeadline } from "../../utils/formatDeadline";
 
 export const TaskViewModal = ({ task,  onClose, onTimeUpdated }) => {
+    const dispatch = useDispatch();
+    const taskId = task?._id || task?.id;
+    const currentTask = useSelector(selectTaskById(taskId)) || task;
     const currentUser = useSelector(selectCurrentUser);
-    const [isEditing, setIsEditing] = useState(false);
-    const [currentTotalDuration, setCurrentTotalDuration] = useState(task.totalDuration || 0);
-    
-    if(!task) return null;
 
-    const executorId =  task.assignedTodo?._id || task.assignedTodo;
+    const [isEditing, setIsEditing] = useState(false);
+    const [currentTotalDuration, setCurrentTotalDuration] = useState(currentTask.totalDuration || 0);
+
+    if(!currentTask) return null;
+
+    const executorId =  currentTask.assignedTodo?._id || currentTask.assignedTodo;
     const isExecutor = executorId === currentUser?._id;
 
-    const isInProgress = task.status === STATUS.IN_PROGRESS;
+    const isInProgress = currentTask.status === STATUS.IN_PROGRESS;
 
-    const currentColumn = COLUMNS.find(col => col.id === task.status);
-    const colTitle = currentColumn ? currentColumn.title : task.status;
-
+    const currentColumn = COLUMNS.find(col => col.id === currentTask.status);
+    const colTitle = currentColumn ? currentColumn.title : currentTask.status;
+    const loggedTimeFromRedux = currentTask.totalDuration || 0;
+    
     const formatCreationDate = (dateString) => {
       if (!dateString) return "Не указана";
       const date = new Date(dateString);
@@ -38,9 +43,9 @@ export const TaskViewModal = ({ task,  onClose, onTimeUpdated }) => {
     if (isEditing) {
         return (
         <TaskForm 
-            key={`${task._id || task.id}-edit`} 
-            task={task} 
-            colId={task.status} 
+            key={`${currentTask._id || currentTask.id}-edit`} 
+            task={currentTask} 
+            colId={currentTask.status} 
             setActiveFormCol={(updatedTask) => {
               if (updatedTask && typeof updatedTask === 'object') {
                 if (onTimeUpdated) onTimeUpdated(updatedTask);
@@ -57,7 +62,7 @@ export const TaskViewModal = ({ task,  onClose, onTimeUpdated }) => {
               <ModalHeader>
                 <div className="title-area">
                   <span className="status-badge">{colTitle}</span>
-                  <h2>{task.title}</h2>
+                  <h2>{currentTask.title}</h2>
                 </div>
                 <div className="header-actions">
                   <button className="edit-toggle-btn" onClick={() => setIsEditing(true)}>
@@ -71,7 +76,7 @@ export const TaskViewModal = ({ task,  onClose, onTimeUpdated }) => {
                 <div className="modal-section">
                   <h4>📋 Описание задачи</h4>
                   <div className="description-box">
-                    {task.description || <span className="empty-text">Описание отсутствует</span>}
+                    {currentTask.description || <span className="empty-text">Описание отсутствует</span>}
                   </div>
                 </div>
 
@@ -79,13 +84,27 @@ export const TaskViewModal = ({ task,  onClose, onTimeUpdated }) => {
                   <div className="info-cell">
                     <span className="cell-label">✍️ Создатель задачи</span>
                     <span className="cell-value creator">
-                      {task?.createdBy?.name || task?.createdBy?.email || "Система"}
+                      {(() => {
+                        if (!currentTask?.createdBy) return "Система";
+                        
+                        if (typeof currentTask.createdBy === "object" && currentTask.createdBy !== null) {
+                          return currentTask.createdBy.name || currentTask.createdBy.email || "Система";
+                        }
+                        
+                        if (typeof currentTask.createdBy === "string") {
+                          const currentUserId = String(currentUser?._id || currentUser?.id || '');
+                          return String(currentTask.createdBy) === currentUserId
+                            ? `${currentUser?.name || currentUser?.email || 'Пользователь'} (Вы)`
+                            : "Сотрудник команды";
+                        }
+                        return "Система";
+                      })()}
                     </span>
                   </div>
                   <div className="info-cell">
                     <span className="cell-label">📅 Срок сдачи</span>
-                    <span className="cell-value estimate" style={{ color: task.dueDate ? '#b91c1c' : '#64748b' }}>
-                      {task.dueDate ? formatDeadline(task.dueDate) : "Не установлен"}
+                    <span className="cell-value estimate" style={{ color: currentTask.dueDate ? '#b91c1c' : '#64748b' }}>
+                      {currentTask.dueDate ? formatDeadline(currentTask.dueDate) : "Не установлен"}
                     </span>
                   </div>
 
@@ -99,19 +118,19 @@ export const TaskViewModal = ({ task,  onClose, onTimeUpdated }) => {
                   <div className="info-cell">
                     <span className="cell-label">👤 Исполнитель</span>
                     <span className="cell-value executor">
-                      {task.assignedTodo?.name || task.assignedTodo?.email || "Не назначен"}
+                      {currentTask.assignedTodo?.name || currentTask.assignedTodo?.email || "Не назначен"}
                     </span>
                   </div>
                   <div className="info-cell">
                     <span className="cell-label">📝 Создана</span>
                     <span className="cell-value creation-date">
-                      {formatCreationDate(task.createdAt)}
+                      {formatCreationDate(currentTask.createdAt)}
                     </span>
                   </div>
                 </div>
 
                 <TaskTimer
-                  taskId={task._id || task.id}
+                  taskId={currentTask._id || currentTask.id}
                   isExecutor={isExecutor}
                   isInProgress={isInProgress}
                   onTimeLogged={(seconds) => {

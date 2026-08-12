@@ -12,22 +12,30 @@ export const TaskCard = ({task, onOpenModal}) => {
     const targetTaskId = task._id || task.id;
 
     const currentUser = useSelector(selectCurrentUser);
+    const currentUserId = currentUser?._id || currentUser?.id;
     const currentProjectId = task.project?._id || task.project;
     const currentProject = useSelector(selectProjectById(currentProjectId));
-
+    let executorId = "";
+    if (task.assignedTodo) {
+      if (typeof task.assignedTodo === "object") {
+        executorId = task.assignedTodo._id || task.assignedTodo.id || "";
+      } else if (typeof task.assignedTodo === "string") {
+        executorId = task.assignedTodo;
+      }
+    }
     
     const projectOwnerId = currentProject?.owner?._id || currentProject?.owner;
     const isProjectOwner = projectOwnerId && currentUser?._id 
       ? String(projectOwnerId) === String(currentUser._id) 
       : false;
 
-    const executorId = task.assignedTodo?._id || (typeof task.assignedTodo === "string" ? task.assignedTodo : null);
-    const isExecutor = executorId && currentUser?._id 
-      ? String(executorId) === String(currentUser._id) 
+    const isExecutor = currentUserId && executorId 
+      ? String(currentUserId).toLowerCase() === String(executorId).toLowerCase() 
       : false;
     const isManagement = [ROLE.ADMIN].includes(currentUser?.role) || isProjectOwner;
-    
+
     const getDeadlineStatus = (dateString) => {
+      if (task.status === STATUS.DONE) return "normal";
       if (!dateString) return "normal";
 
       const taskDate = new Date(dateString);
@@ -94,23 +102,23 @@ export const TaskCard = ({task, onOpenModal}) => {
           
           <div className="task-card-actions-area" onClick={(e) => e.stopPropagation()}>
             {task.status === STATUS.TODO && isExecutor && (
-              <button className="move-state-btn" onClick={() => dispatch(changeTaskStatus(targetTaskId, STATUS.IN_PROGRESS, currentProjectId))} >
+              <button className="move-state-btn" onClick={(e) => {e.stopPropagation(); dispatch(changeTaskStatus(targetTaskId, STATUS.IN_PROGRESS, currentProjectId))} } >
                 В работу →
               </button>
             )}
             
             {(task.status === STATUS.IN_PROGRESS || task.status === STATUS.IN_REVISION) && isExecutor && (
-              <button className="move-state-btn" onClick={() => dispatch(changeTaskStatus(targetTaskId, STATUS.REVIEW, currentProjectId))} >
+              <button className="move-state-btn" onClick={(e) => { e.stopPropagation(); dispatch(changeTaskStatus(targetTaskId, STATUS.REVIEW, currentProjectId))} } >
                 На проверку →
               </button>
             )}
             
             {task.status === STATUS.REVIEW && isManagement && (
               <div className="management-control-group">
-                <button className="reject-state-btn" onClick={() => dispatch(changeTaskStatus(targetTaskId, STATUS.IN_REVISION, currentProjectId))} >
+                <button className="reject-state-btn" onClick={(e) => { e.stopPropagation(); dispatch(changeTaskStatus(targetTaskId, STATUS.IN_REVISION, currentProjectId))}} >
                   ↩ Доработать
                 </button>
-                <button className="accept-state-btn" onClick={() => dispatch(changeTaskStatus(targetTaskId, STATUS.DONE, currentProjectId))} >
+                <button className="accept-state-btn" onClick={(e) => { e.stopPropagation(); dispatch(changeTaskStatus(targetTaskId, STATUS.DONE, currentProjectId))}} >
                   Принять ✓
                 </button>
               </div>

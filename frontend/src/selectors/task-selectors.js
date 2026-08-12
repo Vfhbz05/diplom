@@ -13,3 +13,9 @@ export const selectProjectTotalCost = (state) => {
   const allTasks = selectAllTasks(state);
   return allTasks.reduce((sum, task) => sum + (task.cost || 0), 0);
 };
+
+export const selectTaskById = (taskId) => (state) => {
+  const allTasks = selectAllTasks(state);
+  
+  return allTasks.find(task => String(task._id || task.id) === String(taskId));
+};

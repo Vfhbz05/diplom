@@ -64,6 +64,7 @@ export const KanbanBoard = () => {
               onClose={() => setSelectedTask(null)} 
               onTimeUpdated={(minutesOrTask) => {
                 setSelectedTask((prev) => {
+                  if (!prev) return null;
                   if (minutesOrTask && typeof minutesOrTask === 'object') {
                     return { ...prev, ...minutesOrTask };
                   }

@@ -8,3 +8,8 @@ export const loginUser = (userData) => ({
 export const logoutUser = () => ({
     type: ACTION_TYPES.USER_LOGOUT
 });
+
+export const setUser = (updatedName) => ({
+    type: ACTION_TYPES.SET_USER,
+    payload: updatedName
+});

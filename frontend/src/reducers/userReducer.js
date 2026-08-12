@@ -37,6 +37,14 @@ export function userReducer(state = initialState, { type, payload}){
                 loading: false,
                 error: null
             }
+        case ACTION_TYPES.SET_USER:
+            return{
+                ...state,
+                user: {
+                    ...state.user,
+                    name: payload
+                }
+            }
         default: 
             return state;
     }

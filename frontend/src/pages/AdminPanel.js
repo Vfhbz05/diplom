@@ -25,11 +25,13 @@ export const AdminPanel = () => {
 				return;
 			}
 
-			if (Array.isArray(res)) {
-				setUsers(res);
+			const usersList = res?.users || [];
+
+			if (Array.isArray(usersList)) {
+				setUsers(usersList);
 				
 				const rates = {};
-				res.forEach((user) => {
+				usersList.forEach((user) => {
 					rates[user._id || user.id] = user.hourlyRate || 0;
 				});
 				setLocalRates(rates);
@@ -46,7 +48,7 @@ export const AdminPanel = () => {
 	};
 
 	const handleUpdateUser = async (userId, updatedData) => {
-		const res = await request(`/api/users/${userId}`, "PATCH", updatedData);
+		const res = await request(`/users/${userId}`, "PATCH", updatedData);
 
 		if (res && res.error) {
 			alert(`⚠️ Ошибка: ${res.error}`);
@@ -98,7 +100,7 @@ export const AdminPanel = () => {
 			return;
 		}
 
-		const res = await request(`/api/users/${userId}`, "DELETE");
+		const res = await request(`/users/${userId}`, "DELETE");
 
 		if (res && res.error) {
 			alert(`⚠️ Не удалось удалить пользователя: ${res.error}`);

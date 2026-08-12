@@ -1,9 +1,12 @@
 import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import styled from "styled-components";
 import { request } from "../utils/request";
+import { setUser } from "../actions";
+import { InputGroup } from "../components/InputGroup";
 
 export const Settings = () => {
+	const dispatch = useDispatch();
 	const currentUser = useSelector((state) => state.user?.user) || {};
     const userId = currentUser._id || currentUser.id;
 
@@ -30,27 +33,30 @@ export const Settings = () => {
 		if (!name.trim()) {
 			return alert("Имя пользователя не может быть пустым");
 		}
-
+		
 		setIsProfileSubmitting(true);
 
-		const res = await request(`/api/users/${userId}`, "PATCH", { name: name.trim() });
+		const res = await request(`/users/profile/${userId}`, "PATCH", { name: name.trim() });
 
 		setIsProfileSubmitting(false);
 
 		if (res && res.error) {
 			return alert(`⚠️ Ошибка: ${res.error}`);
 		}
-
+		const currentSessionData = JSON.parse(sessionStorage.getItem('userData')) || {};
+		sessionStorage.setItem('userData', JSON.stringify({ 
+			...currentSessionData, 
+			name: name.trim() 
+			}));
+		
+	
+		dispatch(setUser(name.trim()));
 		setProfileSuccess("Имя профиля успешно обновлено!");
-
-		if (dispatch && typeof dispatch === "function") {
-			dispatch({ type: "SET_USER", payload: { ...currentUser, name: name.trim() } });
-		}
 	};
 
 	const handleChangePassword = async (e) => {
 		e.preventDefault();
-		setSuccess("");
+		setPasswordSuccess("");
 
 		if (!oldPassword || !newPassword || !confirmPassword) {
 			return alert("Заполните все поля формы");
@@ -62,20 +68,20 @@ export const Settings = () => {
 			return alert("Новый пароль и подтверждение не совпадают");
 		}
 
-		setIsSubmitting(true);
+		setIsPasswordSubmitting(true);
 
-		const res = await request("/user/update-password", "POST", {
+		const res = await request('/users/profile/password', "PATCH", {
 			oldPassword,
 			newPassword,
 		});
 
-		setIsSubmitting(false);
+		setIsPasswordSubmitting(false);
 
 		if (res && res.error) {
 			return alert(`⚠️ Ошибка: ${res.error}`);
 		}
 
-		setSuccess("Пароль успешно обновлен!");
+		setPasswordSuccess("Пароль успешно обновлен!");
 		setOldPassword("");
 		setNewPassword("");
 		setConfirmPassword("");
@@ -109,15 +115,14 @@ export const Settings = () => {
 						{profileSuccess && <SuccessAlert>🎉 {profileSuccess}</SuccessAlert>}
 						
 						<form onSubmit={handleUpdateProfile}>
-							<FormGroup>
-								<label>Имя пользователя</label>
-								<input
-									type="text"
-									placeholder="Введите ваше имя"
-									value={name}
-									onChange={(e) => setName(e.target.value)}
-								/>
-							</FormGroup>
+							<InputGroup 
+								id="name"
+								label="Имя пользователя"
+								type="text"
+								placeholder="Введите ваше имя"
+								value={name}
+								onChange={(e) => setName(e.target.value)}
+							/>
 							<SubmitBtn type="submit" disabled={isProfileSubmitting}>
 								{isProfileSubmitting ? "Сохранение..." : "Сохранить имя"}
 							</SubmitBtn>
@@ -130,35 +135,32 @@ export const Settings = () => {
 					{passwordSuccess && <SuccessAlert>🎉 {passwordSuccess}</SuccessAlert>}
 					
 					<form onSubmit={handleChangePassword}>
-						<FormGroup>
-							<label>Текущий пароль</label>
-							<input
-								type="password"
-								placeholder="Введите старый пароль"
-								value={oldPassword}
-								onChange={(e) => setOldPassword(e.target.value)}
-							/>
-						</FormGroup>
+						<InputGroup 
+							id="oldPassword"
+							label="Текущий пароль"
+							type="password"
+							placeholder="Введите старый пароль"
+							value={oldPassword}
+							onChange={(e) => setOldPassword(e.target.value)}
+						/>
 
-						<FormGroup>
-							<label>Новый пароль</label>
-							<input
-								type="password"
-								placeholder="Минимум 6 символов"
-								value={newPassword}
-								onChange={(e) => setNewPassword(e.target.value)}
-							/>
-						</FormGroup>
+						<InputGroup 
+							id="newPassword"
+							label="Новый пароль"
+							type="password"
+							placeholder="Минимум 6 символов"
+							value={newPassword}
+							onChange={(e) => setNewPassword(e.target.value)}
+						/>
 
-						<FormGroup>
-							<label>Подтвердите новый пароль</label>
-							<input
-								type="password"
-								placeholder="Повторите новый пароль"
-								value={confirmPassword}
-								onChange={(e) => setConfirmPassword(e.target.value)}
-							/>
-						</FormGroup>
+						<InputGroup 
+							id="confirmPassword"
+							label="Подтвердите новый пароль"
+							type="password"
+							placeholder="Повторите новый пароль"
+							value={confirmPassword}
+							onChange={(e) => setConfirmPassword(e.target.value)}
+						/>
 
 						<SubmitBtn type="submit" disabled={isPasswordSubmitting}>
 							{isPasswordSubmitting ? "Обновление..." : "Обновить пароль"}
@@ -172,136 +174,116 @@ export const Settings = () => {
 
 
 const SettingsContainer = styled.div`
-	padding: 24px;
-	max-width: 1000px;
-	margin: 0 auto;
-	font-family: system-ui, -apple-system, sans-serif;
+	padding: 24px; 
+	max-width: 1000px; 
+	margin: 0 auto; 
+	font-family: system-ui, -apple-system, sans-serif; 
 `;
-
 const SettingsHeader = styled.div`
-	margin-bottom: 28px;
-	h2 { margin: 0 0 6px 0; color: #1e293b; font-size: 24px; }
-	p { margin: 0; color: #64748b; font-size: 14px; }
+	margin-bottom: 28px; 
+	h2 { margin: 0 0 6px 0; color: #1e293b; font-size: 24px; } 
+	p { margin: 0; 
+	color: #64748b; 
+	font-size: 14px; } 
 `;
-
-const SettingsGrid = styled.div`
-	display: grid;
-	grid-template-columns: 1fr 1.2fr;
+const SettingsGrid = styled.div` 
+	display: grid; 
+	grid-template-columns: 1fr 1.2fr; 
 	gap: 24px;
-
-	@media (max-width: 768px) {
-		grid-template-columns: 1fr;
-	}
+	@media (max-width: 768px) { grid-template-columns: 1fr; } 
 `;
-
-const LeftColumn = styled.div`
-	display: flex;
-	flex-direction: column;
-	gap: 24px;
+const LeftColumn = styled.div` 
+	display: flex; 
+	flex-direction: column; 
+	gap: 24px; 
 `;
-
-const Card = styled.div`
-	background: #ffffff;
-	border: 1px solid #e2e8f0;
-	border-radius: 12px;
-	padding: 24px;
-	box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-	h3 { margin: 0 0 16px 0; color: #1e293b; font-size: 16px; }
+const Card = styled.div` 
+	background: #ffffff; 
+	border: 1px solid #e2e8f0; 
+	border-radius: 12px; 
+	padding: 24px; 
+	box-shadow: 0 1px 3px rgba(0,0,0,0.05); 
+	h3 { margin: 0 0 16px 0;
+	color: #1e293b; 
+	font-size: 16px; } 
 `;
-
-const ProfileCard = styled(Card)`
-	display: flex;
-	flex-direction: column;
+const ProfileCard = styled(Card)` 
+	display: flex; 
+	flex-direction: column; 
 	align-items: center;
 `;
-
-const AvatarBlock = styled.div`
-	width: 70px;
-	height: 70px;
-	background: #f1f5f9;
-	border-radius: 50%;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	font-size: 32px;
+const AvatarBlock = styled.div` 
+	width: 70px; 
+	height: 70px; 
+	background: #f1f5f9; 
+	border-radius: 50%; 
+	display: flex; 
+	align-items: center; 
+	justify-content: center; 
+	font-size: 32px; 
 	margin-bottom: 16px;
-	border: 2px solid #e2e8f0;
+	border: 2px solid #e2e8f0; 
 `;
-
-const ProfileInfo = styled.div`
-	width: 100%;
-	display: flex;
-	flex-direction: column;
-	gap: 12px;
-
-	.info-item {
-		display: flex;
-		flex-direction: column;
-		gap: 2px;
-		border-bottom: 1px solid #f1f5f9;
-		padding-bottom: 8px;
-		&:last-child { border: none; }
-	}
-
-	.label { font-size: 11px; color: #64748b; font-weight: 500; }
-	.value { font-size: 14px; color: #0f172a; font-weight: 500; }
+const ProfileInfo = styled.div` 
+	width: 100%; 
+	display: flex; 
+	flex-direction: column; 
+	gap: 12px; 
 	
-	.badge {
-		width: fit-content;
-		padding: 3px 8px;
-		background: #eff6ff;
-		color: #2563eb;
-		border-radius: 6px;
-		font-size: 11px;
-		font-weight: 600;
-	}
+	.info-item { 
+		display: flex; 
+		flex-direction: column; 
+		gap: 2px; 
+		border-bottom: 1px solid #f1f5f9; 
+		padding-bottom: 8px; 
+		
+		&:last-child { border: none; } } 
+		
+		.label { 
+			font-size: 11px; 
+			color: #64748b; 
+			font-weight: 500; 
+		} 
+			
+		.value { 
+			font-size: 14px; 
+			color: #0f172a; 
+			font-weight: 500; 
+		} 
+			
+		.badge { 
+			width: fit-content; 
+			padding: 3px 8px; 
+			background: #eff6ff;
+			color: #2563eb; 
+			border-radius: 6px; 
+			font-size: 11px; 
+			font-weight: 600; 
+		} 
 `;
-
-const PasswordCard = styled(Card)`
-	h3 { font-size: 18px; }
-`;
-
-const FormGroup = styled.div`
-	display: flex;
-	flex-direction: column;
-	gap: 6px;
-	margin-bottom: 16px;
-
-	label { font-size: 13px; color: #475569; font-weight: 500; }
+const PasswordCard = styled(Card)` h3 { font-size: 18px; } `;
+const SubmitBtn = styled.button` 
+	width: 100%; 
+	padding: 11px; 
+	background: #2563eb; 
+	color: white; 
+	border: none; 
+	border-radius: 8px; 
+	font-size: 14px; 
+	font-weight: 500; 
+	cursor: pointer; 
+	transition: 0.2s; 
+	margin-top: 10px; 
 	
-	input {
-		padding: 10px 12px;
-		border: 1px solid #cbd5e1;
-		border-radius: 8px;
-		font-size: 14px;
-		outline: none;
-		transition: 0.2s;
-		&:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
-	}
+	&:hover { background: #1d4ed8; } 
+	&:disabled { background: #94a3b8; cursor: not-allowed; } 
 `;
-
-const SubmitBtn = styled.button`
-	width: 100%;
-	padding: 11px;
-	background: #2563eb;
-	color: white;
-	border: none;
-	border-radius: 8px;
-	font-size: 14px;
-	font-weight: 500;
-	cursor: pointer;
-	transition: 0.2s;
-	
-	&:hover { background: #1d4ed8; }
-	&:disabled { background: #94a3b8; cursor: not-allowed; }
-`;
-
-const SuccessAlert = styled.div`
-	background: #f0fdf4;
-	color: #16a34a;
-	border: 1px solid #bbf7d0;
-	padding: 10px;
-	border-radius: 8px;
-	font-size: 13px;
-	margin-bottom: 14px;
+const SuccessAlert = styled.div` 
+	background: #f0fdf4; 
+	color: #16a34a; 
+	border: 1px solid #bbf7d0; 
+	padding: 10px; 
+	border-radius: 8px; 
+	font-size: 13px; 
+	margin-bottom: 14px; 
 `;
