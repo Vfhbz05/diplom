@@ -36,15 +36,14 @@ export const Projects = () => {
     });
 
     const totalPages = Math.ceil(sortedProjects.length / LIMIT);
+    const validPage = Math.min(currentPage, Math.max(1, totalPages));
 
-    if(currentPage > totalPages && totalPages > 0){
-        setCurrentPage(1);
-    }
-
-    const startIndex = (currentPage - 1) * LIMIT;
-    const endIndex = startIndex + LIMIT;
-
-    const projectsToDisplay = sortedProjects.slice(startIndex, endIndex);
+    const startIndex = (validPage - 1) * LIMIT;
+    const projectsToDisplay = sortedProjects.slice(startIndex, startIndex + LIMIT);
+    
+    const goToPage = (page) => {
+        setCurrentPage(Math.min(Math.max(1, page), totalPages));
+    };
 
     return(
         <Container>
@@ -81,7 +80,7 @@ export const Projects = () => {
 								<div className="pagination-panel">
 									<button
 										disabled={currentPage === 1}
-										onClick={() => setCurrentPage(currentPage - 1)}
+										onClick={() => goToPage(validPage - 1)}
 										className="page-nav-btn"
 									>
 										← Назад
@@ -89,7 +88,7 @@ export const Projects = () => {
 									<span className="page-info">Страница {currentPage} из {totalPages}</span>
 									<button
 										disabled={currentPage === totalPages}
-										onClick={() => setCurrentPage(currentPage + 1)}
+										onClick={() => goToPage(validPage + 1)}
 										className="page-nav-btn"
 									>
 										Вперед →
@@ -119,8 +118,7 @@ const Container = styled.div`
 	}
 
 	& .projects-subtitle { color: #6c757d; font-size: 16px; margin: 0; }
-
-	/* 5. Обновили стили блока ошибки для красивого выравнивания кнопки флексом */
+	
 	& .error-message {
 		background-color: #fef2f2;
 		color: #dc2626;

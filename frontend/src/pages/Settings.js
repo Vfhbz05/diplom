@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import styled from "styled-components";
 import { request } from "../utils/request";
@@ -10,7 +10,7 @@ export const Settings = () => {
 	const currentUser = useSelector((state) => state.user?.user) || {};
     const userId = currentUser._id || currentUser.id;
 
-    const [name, setName] = useState("");
+    const [name, setName] = useState(currentUser.name || "");
 	const [isProfileSubmitting, setIsProfileSubmitting] = useState(false);
 	const [profileSuccess, setProfileSuccess] = useState("");
 
@@ -19,12 +19,6 @@ export const Settings = () => {
 	const [confirmPassword, setConfirmPassword] = useState("");
 	const [isPasswordSubmitting, setIsPasswordSubmitting] = useState(false);
 	const [passwordSuccess, setPasswordSuccess] = useState("");
-
-    useEffect(() => {
-		if (currentUser.name) {
-			setName(currentUser.name);
-		}
-	}, [currentUser.name]);
 
     const handleUpdateProfile = async (e) => {
 		e.preventDefault();

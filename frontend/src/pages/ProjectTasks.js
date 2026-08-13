@@ -17,9 +17,11 @@ export const ProjectTasks = () => {
     useEffect(() => {
         dispatch(fetchProjectTasks(projectId));
 
-        dispatch(fetchProjects()); 
+        if (!currentProject) {
+          dispatch(fetchProjects()); 
+        }
       
-    }, [projectId, dispatch]);
+    }, [projectId, dispatch, currentProject]);
 
    
 

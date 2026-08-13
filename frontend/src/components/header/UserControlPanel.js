@@ -2,8 +2,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { logoutUser } from "../../actions";
-import { selectCurrentUserName } from "../../selectors";
+import { selectCurrentUserName, selectCurrentUser } from "../../selectors";
 import { openCreateModal } from "../../actions";
+import { ROLE } from "../../constants/role";
 import { CreateProjectForm } from "./CreateProjectForm"; 
 
 
@@ -11,7 +12,10 @@ export const UserControlPanel = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const userName = useSelector(selectCurrentUserName) || "Пользователь";
-     const isCreateModalOpen = useSelector((state) => state.projects?.isCreateModalOpen);
+    const currentUser = useSelector(selectCurrentUser);
+    const isCreateModalOpen = useSelector((state) => state.projects?.isCreateModalOpen);
+
+    const isAdmin = currentUser?.role === ROLE.ADMIN;
 
     const handleLogout = () => {
         sessionStorage.removeItem("userData");
@@ -24,7 +28,13 @@ export const UserControlPanel = () => {
       <ExpandableCreateButton onClick={() => dispatch(openCreateModal())} title="Создать новый проект">
           <span className="plus-icon">＋</span> 
           <span className="button-text">Создать проект</span>
-        </ExpandableCreateButton>
+      </ExpandableCreateButton>
+
+      {isAdmin && (
+          <AdminPanelLink to="/admin" title="Перейти в панель администратора">
+            🛡️ Админ-панель
+          </AdminPanelLink>
+      )}
       <StyledProfileLink to="/settings" title="Перейти в настройки профиля">Привет, <strong>{userName}</strong>!</StyledProfileLink>
       
       <button className="logout-button" onClick={handleLogout}>
@@ -36,6 +46,30 @@ export const UserControlPanel = () => {
     </PanelWrapper>
   );
 }
+
+const AdminPanelLink = styled(Link)`
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #f1f5f9;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.15s ease-in-out;
+  white-space: nowrap;
+  box-sizing: border-box;
+
+  &:hover {
+    background-color: #e2e8f0;
+    color: #0f172a;
+    border-color: #94a3b8;
+    box-shadow: 0 2px 4px rgba(15, 23, 42, 0.05);
+  }
+`;
 
 const ExpandableCreateButton = styled.button`
   display: flex;
