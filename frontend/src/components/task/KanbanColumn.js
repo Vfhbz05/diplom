@@ -1,54 +1,39 @@
 import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom"
 import { selectAllTasks } from "../../selectors";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import styled from "styled-components";
 import { STATUS } from "../../constants/status";
 import { TaskForm } from "./TaskForm";
 import { TaskCard } from "./TaskCard";
 import PropTypes from "prop-types";
 
-export const KanbanColumn = ({ col, onSelectTask, filterStartDate, filterEndDate }) => {
-    const { projectId } = useParams();
+export const KanbanColumn = ({ col, onSelectTask, projectTasks = [],  isProjectOwner }) => {
+    const [isFormActive, setIsFormActive] = useState(false);  
+   
+    const sortedColTasks = useMemo(() => {
+      const filtered = projectTasks.filter(task => task?.status === col.id);
 
-    const allTasks = useSelector(selectAllTasks);
-
-    const [isFormActive, setIsFormActive] = useState(false);
-
-    const colTasks = allTasks.filter((task) => {
-      const taskProjectId = task?.project?._id || task.project;
-      
-      const matchesProjectAndStatus = taskProjectId === projectId && task.status === col.id;
-      if (!matchesProjectAndStatus) return false;
-
-      if (!filterStartDate && !filterEndDate) return true;
-
-      if (!task.dueDate) return false;
-
-      const taskTime = new Date(task.dueDate).setHours(0, 0, 0, 0);
-
-      if (filterStartDate) {
-        const startTime = new Date(filterStartDate).setHours(0, 0, 0, 0);
-        if (taskTime < startTime) return false;
-      }
-
-      if (filterEndDate) {
-        const endTime = new Date(filterEndDate).setHours(23, 59, 59, 999);
-        if (taskTime > endTime) return false;
-      }
-
-      return true;
-    });
+      return filtered.sort((a, b) => {
+        if (a?.dueDate && b?.dueDate) {
+          return new Date(a.dueDate) - new Date(b.dueDate);
+        }
+        if (a?.dueDate) return -1;
+        if (b?.dueDate) return 1;
+        return 0;
+      });
+    }, [projectTasks, col.id]); 
+    
 
     return(
         <ColumnWrapper>
           <h3 className="column-header-title" style={{ borderBottom: `2.5px solid ${col.color}` }}>
             {col.title} 
-            <span className="task-count-badge">{colTasks.length}</span>
+            <span className="task-count-badge">{sortedColTasks.length}</span>
           </h3>
 
           {isFormActive ? (
-            <TaskForm setActiveFormCol={setIsFormActive} colId={col.id} />
+            <TaskForm setActiveFormCol={setIsFormActive} colId={col.id} task={null}/>
           ) : (
             col.id === STATUS.TODO && (
               <button className="open-task-form-btn" onClick={() => setIsFormActive(true)}>
@@ -57,23 +42,15 @@ export const KanbanColumn = ({ col, onSelectTask, filterStartDate, filterEndDate
             )
           )}
           <div className="tasks-scroll-list">
-            {colTasks
-              .slice()
-              .sort((a,b) => {
-                if (a.dueDate && b.dueDate) {
-                  return new Date(a.dueDate) - new Date(b.dueDate);
-                }
-
-                if (a.dueDate) return -1;
-                if (b.dueDate) return 1;
-                return 0;
-              })
-              .map((task) => (
-              <TaskCard key={task._id || task.id} task={task} onOpenModal={() => onSelectTask(task)} />
+            {sortedColTasks.map((task) => (
+              <TaskCard 
+                key={task._id || task.id} 
+                task={task} 
+                onOpenModal={() => onSelectTask(task)} 
+                isProjectOwner={isProjectOwner}
+              />
             ))}
           </div>
-          
-          
         </ColumnWrapper>
   );
 };
@@ -85,8 +62,8 @@ KanbanColumn.propTypes = {
     color: PropTypes.string.isRequired,
   }).isRequired,
   onSelectTask: PropTypes.func.isRequired,
-  filterStartDate: PropTypes.string,
-  filterEndDate: PropTypes.string,
+  projectTasks: PropTypes.array,
+  isProjectOwner: PropTypes.bool.isRequired
 };
 
 const ColumnWrapper = styled.div`

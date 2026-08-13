@@ -7,31 +7,26 @@ import PropTypes from "prop-types";
 import styled from "styled-components";
 import { formatDeadline } from "../../utils/formatDeadline";
 
-export const TaskCard = ({task, onOpenModal}) => {
+export const TaskCard = ({task, onOpenModal, isProjectOwner = false}) => {
     const dispatch = useDispatch();
     const targetTaskId = task._id || task.id;
 
     const currentUser = useSelector(selectCurrentUser);
-    const currentUserId = currentUser?._id || currentUser?.id;
+    
+    const currentUserId = String(currentUser?._id || currentUser?.id || "").trim().replace(/[^\w]/g, "");
     const currentProjectId = task.project?._id || task.project;
-    const currentProject = useSelector(selectProjectById(currentProjectId));
-    let executorId = "";
+    
+    let rawExecutorId = "";
     if (task.assignedTodo) {
       if (typeof task.assignedTodo === "object") {
-        executorId = task.assignedTodo._id || task.assignedTodo.id || "";
+        rawExecutorId = task.assignedTodo._id || task.assignedTodo.id || "";
       } else if (typeof task.assignedTodo === "string") {
-        executorId = task.assignedTodo;
+        rawExecutorId = task.assignedTodo;
       }
     }
-    
-    const projectOwnerId = currentProject?.owner?._id || currentProject?.owner;
-    const isProjectOwner = projectOwnerId && currentUser?._id 
-      ? String(projectOwnerId) === String(currentUser._id) 
-      : false;
+    const executorId = String(rawExecutorId).trim().replace(/[^\w]/g, "");
 
-    const isExecutor = currentUserId && executorId 
-      ? String(currentUserId).toLowerCase() === String(executorId).toLowerCase() 
-      : false;
+    const isExecutor = Boolean(currentUserId && executorId && currentUserId === executorId);
     const isManagement = [ROLE.ADMIN].includes(currentUser?.role) || isProjectOwner;
 
     const getDeadlineStatus = (dateString) => {
@@ -140,6 +135,7 @@ TaskCard.propTypes = {
     assignedTodo: PropTypes.oneOfType([PropTypes.string, PropTypes.object])
   }).isRequired,
   onOpenModal: PropTypes.func.isRequired,
+  isProjectOwner: PropTypes.bool
 };
 
 const CardWrapper = styled.div`

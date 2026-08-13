@@ -1,20 +1,60 @@
 
 import { COLUMNS } from "../../constants/columns";
 import styled from "styled-components";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { TaskViewModal } from "./TaskViewModal";
 import { KanbanColumn } from "./KanbanColumn";
+import { useParams } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { selectAllTasks, selectCurrentUser, selectProjectById } from "../../selectors";
 
 export const KanbanBoard = () => {
+    const { projectId } = useParams();
     const [selectedTask, setSelectedTask] = useState(null);
 
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
 
+    const allTasks = useSelector(selectAllTasks);
+    const currentProject = useSelector(selectProjectById(projectId));
+    const currentUser = useSelector(selectCurrentUser);
+
+
     const handleClearDateFilter = () => {
       setStartDate('');
       setEndDate('');
     };
+
+    const isProjectOwner = useMemo(() => {
+      const currentUserId = String(currentUser?._id || currentUser?.id || "").trim().replace(/[^\w]/g, "");
+      const projectOwnerId = String(currentProject?.owner?._id || currentProject?.owner || "").trim().replace(/[^\w]/g, "");
+      return Boolean(currentUserId && projectOwnerId && currentUserId === projectOwnerId);
+    }, [currentUser, currentProject]);
+
+    const filteredProjectTasks = useMemo(() => {
+      return allTasks.filter((task) => {
+        const taskProjectId = task?.project?._id || task?.project;
+        const matchesProject = taskProjectId === projectId;
+        if (!matchesProject) return false;
+
+        if (!startDate && !endDate) return true;
+        if (!task?.dueDate) return false;
+
+        const taskTime = new Date(task.dueDate).setHours(0, 0, 0, 0);
+
+        if (startDate) {
+          const startTime = new Date(startDate).setHours(0, 0, 0, 0);
+          if (taskTime < startTime) return false;
+        }
+
+        if (endDate) {
+          const endTime = new Date(endDate).setHours(23, 59, 59, 999);
+          if (taskTime > endTime) return false;
+        }
+
+        return true;
+      });
+    }, [allTasks, projectId, startDate, endDate]);
 
     return (
         <BoardWrapper>
@@ -52,8 +92,8 @@ export const KanbanBoard = () => {
                 key={col.id} 
                 col={col} 
                 onSelectTask={setSelectedTask} 
-                filterStartDate={startDate}
-                filterEndDate={endDate}
+                projectTasks={filteredProjectTasks}
+                isProjectOwner = {isProjectOwner} 
               />
             ))} 
           </GridContainer>
@@ -68,7 +108,7 @@ export const KanbanBoard = () => {
                   if (minutesOrTask && typeof minutesOrTask === 'object') {
                     return { ...prev, ...minutesOrTask };
                   }
-                  return { ...prev, loggedTime: (prev.loggedTime || 0) + minutesOrTask };
+                  return prev;
                 });
               }} 
             />

@@ -4,25 +4,29 @@ import { logTaskTimeAction } from "../../actions";
 import { useDispatch } from "react-redux";
 import PropTypes from "prop-types";
 
-export const TaskTimer = ({ taskId, isExecutor, isInProgress, onTimeLogged }) => {
+export const TaskTimer = ({ taskId, isExecutor, isInProgress }) => {
 
   const [isTimerActive, setIsTimerActive] = useState(false);
   const [timerSeconds, setTimerSeconds] = useState(0);
   const timerIntervalRef = useRef(null);
   const dispatch = useDispatch();
 
+  const isTimerActiveRef = useRef(false);
+
   const secondsRef = useRef(0);
   useEffect(() => {
     secondsRef.current = timerSeconds;
   }, [timerSeconds]);
 
-  const saveTimeParamsRef = useRef({ taskId, onTimeLogged, dispatch });
+  const saveTimeParamsRef = useRef({ taskId, dispatch });
   useEffect(() => {
-    saveTimeParamsRef.current = { taskId, onTimeLogged, dispatch };
-  }, [taskId, onTimeLogged, dispatch]);
+    saveTimeParamsRef.current = { taskId, dispatch };
+  }, [taskId, dispatch]);
 
   useEffect(() => {
     if (isTimerActive) {
+      if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+      
       timerIntervalRef.current = setInterval(() => {
         setTimerSeconds((prev) => prev + 1);
       }, 1000);
@@ -34,9 +38,12 @@ export const TaskTimer = ({ taskId, isExecutor, isInProgress, onTimeLogged }) =>
         timerIntervalRef.current = null;
       }
 
-      if (isTimerActive && secondsRef.current > 0) {
+      if (isTimerActiveRef.current && secondsRef.current > 0) {
       const currentSeconds = secondsRef.current;
       const params = saveTimeParamsRef.current;
+
+      isTimerActiveRef.current = false;
+      secondsRef.current = 0;
 
       params.dispatch(logTaskTimeAction(params.taskId, currentSeconds));
       if (params.onTimeLogged) {
@@ -50,10 +57,13 @@ export const TaskTimer = ({ taskId, isExecutor, isInProgress, onTimeLogged }) =>
 
   const startTimer = () => {
     setTimerSeconds(0);
+    isTimerActiveRef.current = true; 
     setIsTimerActive(true);
   };
 
   const stopTimer = () => {
+    isTimerActiveRef.current = false; 
+
     if (timerIntervalRef.current) {
       clearInterval(timerIntervalRef.current);
       timerIntervalRef.current = null;
@@ -61,15 +71,19 @@ export const TaskTimer = ({ taskId, isExecutor, isInProgress, onTimeLogged }) =>
 
     const secondsLogged  = timerSeconds;
 
+    setTimerSeconds(0);
+    setIsTimerActive(false);
+    
+
+    if (secondsLogged <= 0) return;
+
     dispatch(logTaskTimeAction(taskId, secondsLogged)).then((res) => {
       if (!res?.error) {
-        if (onTimeLogged) onTimeLogged(secondsLogged);
         console.log(`Успешно сохранено: зафиксировано ${secondsLogged} сек.`);
       }
     });
 
-    setIsTimerActive(false);
-    setTimerSeconds(0);
+    
   };
 
   const formatTime = (totalSeconds) => {
@@ -158,6 +172,5 @@ TaskTimer.propTypes = {
     PropTypes.number
   ]).isRequired, 
   isExecutor: PropTypes.bool.isRequired,
-  isInProgress: PropTypes.bool.isRequired, 
-  onTimeLogged: PropTypes.func 
+  isInProgress: PropTypes.bool.isRequired
 };

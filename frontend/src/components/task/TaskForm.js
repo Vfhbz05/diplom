@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { InputGroup } from "../InputGroup";
 import { useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -6,13 +6,15 @@ import styled from "styled-components";
 import PropTypes from "prop-types";
 import { getTodayString } from "../../utils/getTodayString";
 import { createTaskAction, updateTaskFieldAction } from "../../actions";
-import { selectProjectById, selectProjectTeam } from "../../selectors";
+import { selectProjectById, selectProjectTeam, selectTaskById } from "../../selectors";
 
 export const TaskForm = ({setActiveFormCol, colId, task = null}) => {
-   const taskId = task?._id || task?.id;
-
+    const taskId = task?._id || task?.id || null;  
     const { projectId } = useParams();
     const dispatch = useDispatch();
+
+    const reduxTask = useSelector(selectTaskById(taskId));
+    const currentTask = reduxTask || task;
     const currentProject = useSelector(selectProjectById(projectId));
     const projectTeam = useSelector(selectProjectTeam(projectId));
     
@@ -21,21 +23,31 @@ export const TaskForm = ({setActiveFormCol, colId, task = null}) => {
       return dateString.split("T")[0];
     };
 
-    const [newTaskTitle, setNewTaskTitle] = useState('');
-    const [newTaskDesc, setNewTaskDesc] = useState('');
-    const [newTaskDueDate, setNewTaskDueDate] = useState(taskId ? formatDateForInput(task.dueDate) : '');
+    const [newTaskTitle, setNewTaskTitle] = useState(currentTask?.title || '');
+    const [newTaskDesc, setNewTaskDesc] = useState(currentTask?.description || '');
+    const [newTaskDueDate, setNewTaskDueDate] = useState(taskId  ? formatDateForInput(currentTask?.dueDate) : '');
     const [newTaskExecutor, setNewTaskExecutor] = useState(
-      taskId ? (task.assignedTodo?._id || task.assignedTodo || '') : ''
+      task ? (currentTask?.assignedTodo?._id || currentTask?.assignedTodo || '') : ''
     );
-    const [prevTaskId, setPrevTaskId] = useState(taskId);
+    const isInitializedRef = useRef(false);
 
-     if (task && (newTaskTitle === '' || taskId !== prevTaskId)) {
-        setNewTaskTitle(task.title || '');
-        setNewTaskDesc(task.description || '');
-        setNewTaskDueDate(formatDateForInput(task.dueDate));
-        setNewTaskExecutor(task.assignedTodo?._id || task.assignedTodo || '');
-        setPrevTaskId(taskId); 
+    useEffect(() => {
+      if (taskId && currentTask && !isInitializedRef.current) {
+        setNewTaskTitle(currentTask.title || "");
+        setNewTaskDesc(currentTask.description || "");
+        setNewTaskDueDate(formatDateForInput(currentTask.dueDate));
+        setNewTaskExecutor(currentTask.assignedTodo?._id || currentTask.assignedTodo || "");
+        if (currentTask.title) {
+          isInitializedRef.current = true; 
+        }
       }
+    }, [taskId, currentTask]);
+
+    useEffect(() => {
+      return () => {
+        isInitializedRef.current = false;
+      };
+    }, [taskId]);
 
     const handleFormSubmit = (e) => {
       e.preventDefault();
@@ -71,8 +83,8 @@ export const TaskForm = ({setActiveFormCol, colId, task = null}) => {
       const handleCleanAndClose = (payload = false) => {
             setNewTaskTitle(''); 
             setNewTaskDesc(''); 
-            setNewTaskDueDate(0); 
-            setNewTaskExecutor(''); 
+            setNewTaskDueDate(''); 
+            setNewTaskExecutor('');
             setActiveFormCol(payload); 
       };
 
@@ -84,7 +96,7 @@ export const TaskForm = ({setActiveFormCol, colId, task = null}) => {
         }}>
           <ModalContainer onClick={(e) => e.stopPropagation()}>
             <ModalHeader>
-              <h3>{task ? "Редактирование задачи" : "Создание новой задачи"}</h3>
+              <h3>{task  ? "Редактирование задачи" : "Создание новой задачи"}</h3>
               <button type="button" className="close-x-btn" onClick={() => handleCleanAndClose(false)}>×</button>
             </ModalHeader>
 
@@ -137,7 +149,7 @@ export const TaskForm = ({setActiveFormCol, colId, task = null}) => {
               </div>
               <div className="inline-task-button-group">
                 <button type="submit" className='save-task-btn'>
-                  {task ? "Сохранить" : "Создать"}
+                  {currentTask ? "Сохранить" : "Создать"}
                 </button>
                 <button type="button" className="cancel-task-btn" onClick={() => handleCleanAndClose(false)}>
                   Отмена
@@ -152,7 +164,7 @@ export const TaskForm = ({setActiveFormCol, colId, task = null}) => {
 TaskForm.propTypes = {
   setActiveFormCol: PropTypes.func.isRequired,
   colId: PropTypes.string,
-  task: PropTypes.object
+  task: PropTypes.object  
 };
 
 

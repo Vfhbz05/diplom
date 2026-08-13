@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { selectCurrentUser, selectTaskById } from '../../selectors';
 import { STATUS } from '../../constants/status';
 import { COLUMNS } from '../../constants/columns';
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { TaskForm } from "./TaskForm";
 import { formatTotalLoggedTime } from "../../utils/formatTotalLoggedTime";
 import { formatDeadline } from "../../utils/formatDeadline";
@@ -16,20 +16,31 @@ export const TaskViewModal = ({ task,  onClose, onTimeUpdated }) => {
     const currentTask = useSelector(selectTaskById(taskId)) || task;
     const currentUser = useSelector(selectCurrentUser);
 
+    if(!currentTask) return null;
+
     const [isEditing, setIsEditing] = useState(false);
     const [currentTotalDuration, setCurrentTotalDuration] = useState(currentTask.totalDuration || 0);
 
-    if(!currentTask) return null;
+    useEffect(() => {
+      if (currentTask?.totalDuration !== undefined) {
+        setCurrentTotalDuration(currentTask.totalDuration);
 
-    const executorId =  currentTask.assignedTodo?._id || currentTask.assignedTodo;
-    const isExecutor = executorId === currentUser?._id;
+        if (onTimeUpdated) {
+          onTimeUpdated(currentTask);
+        }
+      }
+    }, [currentTask?.totalDuration]);
 
+    const rawExecutorId = currentTask.assignedTodo?._id || currentTask.assignedTodo || "";
+    const executorId = String(rawExecutorId).trim().replace(/[^\w]/g, "");
+    const currentUserId = String(currentUser?._id || currentUser?.id || "").trim().replace(/[^\w]/g, "");
+
+    const isExecutor = Boolean(executorId && currentUserId && executorId === currentUserId);
     const isInProgress = currentTask.status === STATUS.IN_PROGRESS;
 
     const currentColumn = COLUMNS.find(col => col.id === currentTask.status);
     const colTitle = currentColumn ? currentColumn.title : currentTask.status;
-    const loggedTimeFromRedux = currentTask.totalDuration || 0;
-    
+
     const formatCreationDate = (dateString) => {
       if (!dateString) return "Не указана";
       const date = new Date(dateString);
@@ -133,10 +144,6 @@ export const TaskViewModal = ({ task,  onClose, onTimeUpdated }) => {
                   taskId={currentTask._id || currentTask.id}
                   isExecutor={isExecutor}
                   isInProgress={isInProgress}
-                  onTimeLogged={(seconds) => {
-                     setCurrentTotalDuration((prev) => prev + seconds);
-                     if (onTimeUpdated) onTimeUpdated(seconds);
-                  }}
                 />
               </ModalBody>
             </ModalContainer>
