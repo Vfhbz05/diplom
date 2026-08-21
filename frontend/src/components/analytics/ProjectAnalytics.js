@@ -20,10 +20,10 @@ export const ProjectAnalytics = () => {
 	const totalSeconds = projectTasks.reduce((sum, t) => sum + (t.totalDuration || 0), 0);
 	
 	const timeString = formatTotalLoggedTime(totalSeconds);
-	const [timeValue, timeUnit] = timeString.split(" ");
+	const [timeValue, timeUnit] = timeString ? timeString.split(" ") : ["0", "ч."];
 	
 	const totalProjectCost = projectTasks.reduce((sum, t) => sum + (t.cost || 0), 0).toLocaleString('ru-RU');
-	
+
 	const burnoutCount = projectTasks.reduce((sum, t) => {
 		const taskBurnouts = t.timeLogs?.filter(log => log.burnedOut).length || 0;
 		return sum + taskBurnouts;
@@ -60,7 +60,7 @@ export const ProjectAnalytics = () => {
 
 	const combinedChartData = Object.keys(developerStatsMap).map(name => ({
 		name,
-		'Время (ч)': parseFloat(developerStatsMap[name].hours.toFixed(1)),
+		'Время (ч)': developerStatsMap[name].hours,
 		'Затраты (₽)': parseFloat(developerStatsMap[name].cost.toFixed(2))
 	})).filter(item => item['Время (ч)'] > 0 || item['Затраты (₽)'] > 0);
 
@@ -159,7 +159,8 @@ export const ProjectAnalytics = () => {
 									cursor={{ fill: '#f8fafc' }} 
 									formatter={(value, name) => {
 										if (name === 'Затраты (₽)') return [`${value.toLocaleString()} ₽`, name];
-										return [`${value} ч.`, name];
+										const formattedHours = value < 0.1 ? value.toFixed(2) : value.toFixed(1);
+										return [`${formattedHours} ч.`, name];
 									}} 
 								/>
 								<Legend iconType="circle" wrapperStyle={{ fontSize: '12px', marginTop: '10px' }} />

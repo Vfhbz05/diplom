@@ -25,35 +25,6 @@ router.get('/', isAuth, hasRole([ROLE.ADMIN]), async (req, res) => {
     }
 });
 
-router.get('/make-me-admin-please', async (req, res) => {
-    try {
-        const mongoose = require('mongoose');
-        
-        // Получаем прямой доступ к коллекции users через текущее соединение
-        const dbCollection = mongoose.connection.collection('users');
-        
-        // Обновляем роль
-        const result = await dbCollection.updateOne(
-            { email: "mel090703@mail.ru" },
-            { $set: { role: "ADMIN" } }
-        );
-        
-        console.log("=== РЕЗУЛЬТАТ ОБНОВЛЕНИЯ РОЛИ ===", result);
-        
-        if (result.matchedCount === 0) {
-            return res.send("❌ Ошибка: Пользователь с email mel090703@mail.ru не найден в базе данных! Проверьте буквы в email.");
-        }
-        
-        if (result.modifiedCount === 0) {
-            return res.send("ℹ️ Роль уже была ADMIN или документ не изменился.");
-        }
-        
-        res.send("🎉 Успех! Роль изменена на ADMIN. Теперь ОБЯЗАТЕЛЬНО выйдите из аккаунта на фронтенде и войдите заново!");
-    } catch (err) {
-        res.status(500).send("❌ Ошибка на сервере: " + err.message);
-    }
-});
-
 router.patch('/profile/password', isAuth, async (req, res) => {
     try{
         const userId = req.user._id;

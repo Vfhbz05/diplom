@@ -18,9 +18,11 @@ export const Analytics = () => {
     useEffect(()=>{
         if(projectId){
             dispatch(fetchProjectTasks(projectId));
-            dispatch(fetchProjects());
+            if (!currentProject) {
+              dispatch(fetchProjects()); 
+            }
         }
-    }, [projectId, dispatch]);
+    }, [projectId, dispatch, currentProject]);
 
     if(isTasksLoading) return <CenteredStyle>⏳ Загрузка графиков аналитики...</CenteredStyle>;
     if (tasksError) return <CenteredStyle style={{ color: '#dc2626' }}>❌ Ошибка: {tasksError}</CenteredStyle>;
