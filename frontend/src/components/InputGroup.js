@@ -28,8 +28,6 @@ const InputGroupContainer = ({ className, label, id, type, register, ...props })
                 rows = '3'
                 {...props}
                 {...registerProps}
-                value={value}
-                onChange={onChange} 
               />
             ) : (
               <input 
@@ -37,8 +35,6 @@ const InputGroupContainer = ({ className, label, id, type, register, ...props })
                 type = {currentType}
                 {...props} 
                 {...registerProps}
-                value={value} 
-                onChange={onChange}
               />
             )}
 
