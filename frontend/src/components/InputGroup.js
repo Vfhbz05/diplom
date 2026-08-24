@@ -2,7 +2,7 @@ import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { useState } from 'react';
 
-const InputGroupContainer = ({ className, label, id, type, register, value, onChange,...props }) => {
+const InputGroupContainer = ({ className, label, id, type, register, ...props }) => {
   
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
@@ -26,8 +26,8 @@ const InputGroupContainer = ({ className, label, id, type, register, value, onCh
               <textarea
                 id={id}
                 rows = '3'
-                {...registerProps}
                 {...props}
+                {...registerProps}
                 value={value}
                 onChange={onChange} 
               />
@@ -35,8 +35,8 @@ const InputGroupContainer = ({ className, label, id, type, register, value, onCh
               <input 
                 id={id} 
                 type = {currentType}
-                {...registerProps}
                 {...props} 
+                {...registerProps}
                 value={value} 
                 onChange={onChange}
               />
@@ -147,10 +147,5 @@ InputGroupContainer.propTypes = {
   label: PropTypes.string,
   id: PropTypes.string.isRequired,
   type: PropTypes.string,
-  value: PropTypes.oneOfType([
-    PropTypes.string,
-    PropTypes.number
-  ]),
-  onChange: PropTypes.func,
   register: PropTypes.object,
 };
