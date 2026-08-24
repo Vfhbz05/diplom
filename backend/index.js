@@ -11,7 +11,7 @@ const PORT = process.env.PORT;
 const DB_URL = process.env.MONGODB_URI;
 
 app.use(cors({
-    origin: ['http://localhost:5173', 'https://my-diplom-backend.onrender.com'],
+    origin: true,
     credentials: true 
 }));
 app.use(express.json());
