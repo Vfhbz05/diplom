@@ -62,7 +62,7 @@ export const AdminPanel = () => {
 	};
 
 	const handleSaveRate = async (userId) => {
-		const rateValue = parseFloat(localRates[userId]);
+		const rateValue = Number(localRates[userId]);
 		
 		if (isNaN(rateValue) || rateValue < 0) {
 			return alert("Почасовая ставка не может быть отрицательной");
