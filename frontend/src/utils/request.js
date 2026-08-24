@@ -1,6 +1,6 @@
 export async function request (url, method = 'GET', data = null){
 
-    const BASE_URL = 'http://localhost:5000'; 
+    const BASE_URL = 'https://my-diplom-backend.onrender.com'; 
 
     const options = {
         method,
