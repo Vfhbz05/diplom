@@ -47,14 +47,21 @@ export const ProjectList = ({ filteredProjects }) => {
   };
 
   const isDatabaseEmpty = allProjects.length === 0;
+  const isRegularUser = currentUserRole === ROLE.USER;
 
   return (
     <ListGridContainer>
       {filteredProjects.length === 0 ? (
         isDatabaseEmpty ? (
+          isRegularUser ? (
+            <div className="empty-state">
+              Вы пока не являетесь участником ни одного из проектов. Обратитесь к руководителю команды для добавления в рабочее пространство.
+            </div>
+          ) : (
             <div className="empty-state">
                 У вас пока ни одного проекта.  Нажмите кнопку «Создать проект» в шапке, чтобы добавить первый!
             </div>
+          )
         ) : (
             <div className='empty-state search-empty'>
                 Проекты с таким названием не найдены. Попробуйте изменить запрос.

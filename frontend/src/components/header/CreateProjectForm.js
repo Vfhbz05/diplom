@@ -23,13 +23,15 @@ const projectFormSchema = yup.object().shape({
 
 export const CreateProjectForm = () => {
     const [serverError, setServerError] = useState(null); 
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
     const dispatch = useDispatch();
 
     const {
         register,
         handleSubmit,
         reset,
-        formState: {errors},
+        formState: {errors, isValid},
     } = useForm({
             defaultValues: {
                 name: '',
@@ -41,17 +43,23 @@ export const CreateProjectForm = () => {
 
 
     const onSubmit = ({ name, description, deadline }) => {
-            dispatch(createNewProject({ name, description, deadline }))
-                .then((data) => {
-                    if(data && data.error){
-                        setServerError(`Не удалось создать проект: ${data.error}`);
-                        return;
-                    }
-                    reset();
-                    setServerError(null);
-                    dispatch(closeCreateModal());
-                }).catch((err)=> setServerError(`Ошибка при создании: ${err.message}`));
-        }; 
+        setServerError(null); 
+        setIsSubmitting(true);
+        dispatch(createNewProject({ name, description, deadline }))
+            .then((data) => {
+                if(data && data.error){
+                    setServerError(`Не удалось создать проект: ${data.error}`);
+                    setIsSubmitting(false);
+                    return;
+                }
+                reset();
+                setServerError(null);
+                dispatch(closeCreateModal());
+            }).catch((err)=> setServerError(`Ошибка при создании: ${err.message}`))
+            .finally(() => {
+                setIsSubmitting(false);
+            });
+    }; 
 
     const handleClose = () => {
         reset();
@@ -94,8 +102,8 @@ export const CreateProjectForm = () => {
                         </div>
                         
                         <div className="form-actions-row">
-                        <button type='submit' className='submit-project-btn' disabled={!!formError}>
-                            Создать проект
+                        <button type='submit' className='submit-project-btn' disabled={!isValid || isSubmitting}>
+                            {isSubmitting ? "Создание..." : "Создать проект"}
                         </button>
                         <button type='button' className='cancel-project-btn' onClick={handleClose}>
                             Отмена

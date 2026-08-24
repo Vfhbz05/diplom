@@ -2,7 +2,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { logoutUser } from "../../actions";
-import { selectCurrentUserName, selectCurrentUser } from "../../selectors";
+import { selectCurrentUserName, selectCurrentUser, selectCurrentUserRole } from "../../selectors";
 import { openCreateModal } from "../../actions";
 import { ROLE } from "../../constants/role";
 import { CreateProjectForm } from "./CreateProjectForm"; 
@@ -12,10 +12,11 @@ export const UserControlPanel = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const userName = useSelector(selectCurrentUserName) || "Пользователь";
-    const currentUser = useSelector(selectCurrentUser);
+    const userRole = useSelector(selectCurrentUserRole);
     const isCreateModalOpen = useSelector((state) => state.projects?.isCreateModalOpen);
 
-    const isAdmin = currentUser?.role === ROLE.ADMIN;
+    const isAdmin = userRole === ROLE.ADMIN;
+    const isRegularUser = userRole === ROLE.USER;
 
     const handleLogout = () => {
         sessionStorage.removeItem("userData");
@@ -25,10 +26,13 @@ export const UserControlPanel = () => {
 
   return(
     <PanelWrapper>
-      <ExpandableCreateButton onClick={() => dispatch(openCreateModal())} title="Создать новый проект">
+      {!isRegularUser && (
+        <ExpandableCreateButton onClick={() => dispatch(openCreateModal())} title="Создать новый проект">
           <span className="plus-icon">＋</span> 
           <span className="button-text">Создать проект</span>
-      </ExpandableCreateButton>
+        </ExpandableCreateButton>
+      )}
+      
 
       {isAdmin && (
           <AdminPanelLink to="/admin" title="Перейти в панель администратора">
