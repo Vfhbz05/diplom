@@ -2,11 +2,10 @@ import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { selectCurrentUserId, selectCurrentUser } from './selectors';
 import { Login, Page404, Projects, Register, ProjectTasks, Analytics, AdminPanel, Settings } from './pages';
 import { Header } from './components';
-import { useSelector } from 'react-redux';
 import { ROLE } from './constants/role';
 import { loginUser, logoutUser } from './actions';
-import { useDispatch, useSelector } from 'react-redux';
 import { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { request } from './utils/request';
 
 function App() {
