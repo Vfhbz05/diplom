@@ -4,6 +4,7 @@ import styled from "styled-components";
 import { request } from "../utils/request";
 import { setUser } from "../actions";
 import { InputGroup } from "../components/InputGroup";
+import { ROLE } from "../constants/role";
 
 export const Settings = () => {
 	const dispatch = useDispatch();
@@ -99,7 +100,7 @@ export const Settings = () => {
 							</div>
 							<div className="info-item">
 								<span className="label">Роль в системе</span>
-								<span className="badge">{currentUser.role || "USER"}</span>
+								<span className="badge">{currentUser.role || ROLE.USER}</span>
 							</div>
 						</ProfileInfo>
 					</ProfileCard>

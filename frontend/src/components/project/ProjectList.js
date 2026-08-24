@@ -9,6 +9,7 @@ import { useState } from "react";
 import { EditOwner, EditProjectForm, StandartProjectCard } from "../projectList";
 import styled from "styled-components";
 import PropTypes from "prop-types";
+import { ROLE } from '../../constants/role'; 
 
 export const ProjectList = ({ filteredProjects }) => {
   const dispatch = useDispatch();

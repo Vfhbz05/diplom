@@ -1,12 +1,7 @@
 import { useEffect, useState } from "react";
 import styled from "styled-components";
 import { request } from "../utils/request";
-
-const ROLES = {
-	USER: "USER",
-	MODERATOR: "MODERATOR",
-	ADMIN: "ADMIN",
-};
+import { ROLE } from "../constants/role";
 
 export const AdminPanel = () => {
 	const [users, setUsers] = useState([]);
@@ -154,9 +149,9 @@ export const AdminPanel = () => {
 											value={user.role}
 											onChange={(e) => handleRoleChange(uId, e.target.value)}
 										>
-											<option value={ROLES.USER}>Разработчик (USER)</option>
-											<option value={ROLES.MODERATOR}>Тимлид (MODERATOR)</option>
-											<option value={ROLES.ADMIN}>Администратор (ADMIN)</option>
+											<option value={ROLE.USER}>Разработчик (USER)</option>
+											<option value={ROLE.MODERATOR}>Тимлид (MODERATOR)</option>
+											<option value={ROLE.ADMIN}>Администратор (ADMIN)</option>
 										</RoleSelect>
 									</td>
 									<td>
