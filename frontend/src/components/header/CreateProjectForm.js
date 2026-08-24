@@ -38,6 +38,7 @@ export const CreateProjectForm = () => {
                 description: '',
                 deadline: '',
             },
+            mode: "onChange", 
             resolver: yupResolver(projectFormSchema),
         });
 
@@ -84,20 +85,20 @@ export const CreateProjectForm = () => {
                             label='Название проекта'
                             type='text'
                             placeholder='Например: Построение 3D модели машины для картинга'
-                            register={register('name', { onChange: () => setServerError(null) })}
+                            {...register('name', { onChange: () => setServerError(null) })}
                         />
                         <InputGroup
                             id='description'
                             label='Описание проекта'
                             type='textarea'
                             placeholder='Кратко опишите цели или технологии...'
-                            register={register('description', { onChange: () => setServerError(null) })}
+                            {...register('description', { onChange: () => setServerError(null) })}
                         />
                         <InputGroup
                             id='deadline'
                             label='Дата сдачи проекта'
                             type='date'
-                            register={register('deadline', { onChange: () => setServerError(null) })}
+                            {...register('deadline', { onChange: () => setServerError(null) })}
                         />
                         </div>
                         
