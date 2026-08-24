@@ -9,7 +9,7 @@ router.post('/register', async (req, res) => {
         const { name, email, password } = req.body;
         const { token, user } = await register(name, email, password);
 
-        res.cookie('token', token, { httpOnly: true, maxAge: 30 * 24 * 60 * 60 * 1000})
+        res.cookie('token', token, { httpOnly: true, secure: true, sameSite: 'none', maxAge: 30 * 24 * 60 * 60 * 1000})
         .send({error: null, user: mapUser(user)});
     } catch(err){
         res.status(400).send({ error: err.message || 'Неизвестная ошибка'});
@@ -21,7 +21,7 @@ router.post('/login', async (req, res) => {
         const { email, password } = req.body;
         const { token, user } = await login(email, password);
 
-        res.cookie('token', token, { httpOnly: true, maxAge: 30 * 24 * 60 * 60 * 1000})
+        res.cookie('token', token, { httpOnly: true, secure: true, sameSite: 'none', maxAge: 30 * 24 * 60 * 60 * 1000})
         .send({error: null, user: mapUser(user)});
     } catch(err){
         res.status(400).send({ error: err.message || 'Неизвестная ошибка'});
@@ -29,7 +29,7 @@ router.post('/login', async (req, res) => {
 });
 
 router.post('/logout', (req, res) => {
-    res.cookie('token', '', {httpOnly: true})
+    res.cookie('token', '', {httpOnly: true, secure: true, sameSite: 'none'})
         .send({});
 })
 
