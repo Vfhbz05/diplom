@@ -72,7 +72,14 @@ router.patch('/:id/owner', isAuth, isProjectOwnerOrAdmin, async (req, res) => {
 
 router.patch('/:id', isAuth, isProjectOwnerOrAdmin, async (req, res) => {
     try{
-        const updatedProject = await updateProject(req.project, req.body);
+        const { name, description, deadline } = req.body;
+
+        const safeData = {};
+        if (name !== undefined) safeData.name = name;
+        if (description !== undefined) safeData.description = description;
+        if (deadline !== undefined) safeData.deadline = deadline;
+
+        const updatedProject = await updateProject(req.project, safeData);
         res.send({ error: null, project: updatedProject });
     } catch(err){
         res.status(400).send({ error: err.message });

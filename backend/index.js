@@ -10,13 +10,29 @@ const app = express();
 const PORT = process.env.PORT;
 const DB_URL = process.env.MONGODB_URI;
 
+const allowedOrigins = [
+  'http://localhost:3000', 
+  'http://localhost:5173', 
+  'https://my-diplom-app.onrender.com' 
+];
+
+
 app.use(cors({
-    origin: true,
+    origin: function (origin, callback) {
+        if (!origin) return callback(null, true);
+        
+        if (allowedOrigins.indexOf(origin) !== -1) {
+        callback(null, true);
+        } else {
+        callback(new Error('Blocked by CORS: Unauthorized origin'));
+        }
+    },
     credentials: true 
 }));
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.static('../frontend/build'));
+
 
 mongoose.connect(DB_URL).then(()=> console.log(chalk.blue('Успешное подключение к MongoDB!')))
     .catch((err)=> console.error(chalk.red('Ошибка подключения к MongoDB', err)));

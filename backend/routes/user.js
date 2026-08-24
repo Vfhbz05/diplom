@@ -39,9 +39,13 @@ router.patch('/profile/password', isAuth, async (req, res) => {
 
 router.patch('/profile/:id', isAuth, async (req, res) => {
     try{
-        const userId = req.params.id;
+        const userIdFromToken  = req.user._id || req.user.id;
+        const targetUserId = req.params.id;
         const { name } = req.body;
 
+        if (userIdFromToken.toString() !== targetUserId.toString() && req.user.role !== ROLE.ADMIN) {
+            return res.status(403).json({ error: 'Доступ запрещен: нельзя редактировать чужой профиль' });
+        }
         const updatedUser = await updateOwnProfile(userId, name);
 
         res.json(updatedUser);

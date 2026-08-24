@@ -4,7 +4,7 @@ import styled from "styled-components";
 import { selectCurrentUser, selectProjectById, selectProjectTeam } from "../../selectors";
 import { useParams } from "react-router-dom";
 import { ROLE } from "../../constants/role";
-import { addTeamMember, fetchProjectTasks, removeTeamMember } from "../../actions";
+import { addTeamMember, fetchProjectTasks, removeTeamMember, fetchProjects  } from "../../actions";
 
 export const TeamPanel = () => {
 
@@ -38,7 +38,7 @@ export const TeamPanel = () => {
               setNewMemberEmail('');
               setIsAddingMember(false);
               setMemberError('');
-              dispatch(fetchProjectById(projectId));
+              dispatch(fetchProjects());
             }
         });
     };
@@ -48,6 +48,7 @@ export const TeamPanel = () => {
                 dispatch(removeTeamMember(projectId, userId)).then((res) => {
                     if(!res?.error){
                         dispatch(fetchProjectTasks(projectId));
+                        dispatch(fetchProjects());
                     }
                 });
             }

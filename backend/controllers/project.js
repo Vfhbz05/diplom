@@ -119,6 +119,9 @@ async function updateProject(project, updateData){
 }
 
 async function deleteProject(project){
+    
+    await Task.deleteMany({ project: project._id });
+
     await Project.findByIdAndDelete(project._id);
     return true;
 }

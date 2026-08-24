@@ -1,6 +1,9 @@
 const bcrypt = require('bcryptjs');
 const User = require('../models/User');
+const Task = require('../models/Task');
+const Project = require('../models/Project');
 const { generate }= require('../helpers/token');
+const ROLE = require('../constants/role');
 
 async function register(name, email, password){
     if(!password) throw new Error('Пароль пуст');
@@ -71,6 +74,23 @@ async function updateUserByAdmin(userId, newData){
 }
 
 async function deleteUserByAdmin(userId){
+    const adminUser = await User.findOne({ role: ROLE.ADMIN });
+
+    if (!adminUser) {
+        throw new Error('Критическая ошибка: в системе не найден Администратор для передачи прав на проекты');
+    }
+
+    await Project.updateMany(
+        { owner: userId },
+        { $set: { owner: adminUser._id } }
+    );
+
+     await Task.updateMany(
+        { assignedTodo: userId },
+        { $set: { assignedTodo: null } }
+    );
+
+
     const deletedUser = await User.findByIdAndDelete(userId);
     if(!deletedUser) throw new Error('Пользователь не найден');
     return true;

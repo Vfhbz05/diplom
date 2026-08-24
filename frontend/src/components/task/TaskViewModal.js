@@ -16,8 +16,6 @@ export const TaskViewModal = ({ task,  onClose, onTimeUpdated }) => {
     const currentTask = useSelector(selectTaskById(taskId)) || task;
     const currentUser = useSelector(selectCurrentUser);
 
-    if(!currentTask) return null;
-
     const [isEditing, setIsEditing] = useState(false);
     const [currentTotalDuration, setCurrentTotalDuration] = useState(currentTask.totalDuration || 0);
 
@@ -29,7 +27,9 @@ export const TaskViewModal = ({ task,  onClose, onTimeUpdated }) => {
           onTimeUpdated(currentTask);
         }
       }
-    }, [currentTask?.totalDuration]);
+    }, [currentTask?.totalDuration, onTimeUpdated]);
+
+    if(!currentTask) return null;
 
     const rawExecutorId = currentTask.assignedTodo?._id || currentTask.assignedTodo || "";
     const executorId = String(rawExecutorId).trim().replace(/[^\w]/g, "");

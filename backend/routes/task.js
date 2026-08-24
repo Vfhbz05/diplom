@@ -75,7 +75,15 @@ router.patch('/:id', isAuth, async (req,res) => {
             return res.status(403).send({ error: 'У вас нет прав на редактирование этой задачи' });
         }
 
-        const updatedTask = await updateTask(req.params.id, req.body);
+        const { title, description, dueDate, assignedTodo } = req.body;
+
+        const safeTaskUpdates = {};
+        if (title !== undefined) safeTaskUpdates.title = title.trim();
+        if (description !== undefined) safeTaskUpdates.description = description.trim();
+        if (dueDate !== undefined) safeTaskUpdates.dueDate = dueDate;
+        if (assignedTodo !== undefined) safeTaskUpdates.assignedTodo = assignedTodo;
+
+        const updatedTask = await updateTask(req.params.id, safeTaskUpdates);
         res.send({ error: null, task: updatedTask });
     } catch(err){
         res.status(400).send({ error: err.message });

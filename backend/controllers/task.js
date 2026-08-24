@@ -125,7 +125,7 @@ async function updateTaskStatus(taskId, newStatus, user){
         if(!isExecutor){
             throw new Error('Отправить задачу на повторную проверку может только её исполнитель');
         }
-    } else if (currentStatus === STATUS.REVIEW && newStatus === STATUS.DONE || newStatus === STATUS.IN_REVISION){
+    } else if (currentStatus === STATUS.REVIEW && (newStatus === STATUS.DONE || newStatus === STATUS.IN_REVISION)){
         if(!isManagement && !isProjectOwner){
             throw new Error('Вернуть задачу или завершить проверку и принять задачу может только модератор или админ');
         }
